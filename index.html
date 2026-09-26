@@ -1,0 +1,717 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — AM Premium</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="icon" href="image/am.png" type="image/png">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --clr-a: #00f0ff;
+    --clr-b: #ff00e5;
+    --clr-c: #9d00ff;
+    --clr-d: #00ff9d;
+    --clr-base: #05010f;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Segoe UI', 'Courier New', monospace;
+    background: var(--clr-base);
+    color: #e0f7ff;
+    overflow-x: hidden;
+  }
+
+  .grd-bg {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 0, 229, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0; pointer-events: none;
+  }
+
+  .glow-blob { display: none; }
+  .lines-overlay { display: none; }
+
+  .page-wrap {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px 16px;
+  }
+
+  .card-box {
+    width: 100%; max-width: 460px;
+    background: rgba(10, 5, 25, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    border-radius: 18px;
+    padding: 32px 26px 26px;
+    box-shadow:
+      0 0 20px rgba(0, 240, 255, 0.15),
+      0 0 40px rgba(157, 0, 255, 0.12);
+    position: relative; overflow: hidden;
+    text-align: center;
+  }
+
+  .brand-logo {
+    width: 90px; height: 90px;
+    margin: 0 auto 12px;
+    display: flex; align-items: center; justify-content: center;
+    filter: drop-shadow(0 0 10px var(--clr-a));
+  }
+  .brand-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+  .brand-name {
+    font-size: 22px; font-weight: 800; letter-spacing: 3px;
+    background: linear-gradient(90deg, var(--clr-a), var(--clr-b), var(--clr-c));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-transform: uppercase;
+  }
+
+  .brand-sub {
+    color: #7dd3fc; font-size: 11.5px; margin-top: 5px;
+    letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.75;
+  }
+
+  .login-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,240,255,0.4), rgba(255,0,229,0.4), transparent);
+    margin: 20px 0 18px;
+  }
+
+  .auth-tabs {
+    display: flex;
+    background: rgba(0, 240, 255, 0.04);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .auth-tab i { font-size: 12px; }
+  .auth-tab.active {
+    background: linear-gradient(135deg, var(--clr-c), var(--clr-b), var(--clr-a));
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 0, 229, 0.3);
+  }
+  .auth-tab:hover:not(.active) {
+    color: #cbd5e1;
+    background: rgba(0, 240, 255, 0.06);
+  }
+
+  .auth-form { display: none; }
+  .auth-form.active { display: block; }
+
+  .lbl-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: var(--clr-a);
+    margin-bottom: 7px; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    text-align: left;
+  }
+  .lbl-row i { font-size: 12px; }
+
+  .inp-box { position: relative; margin-bottom: 14px; }
+  .inp-box input {
+    width: 100%;
+    padding: 13px 42px 13px 42px;
+    background: rgba(0, 240, 255, 0.04);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 10px;
+    color: #e0f7ff;
+    font-size: 13.5px;
+    font-family: 'Courier New', monospace;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .inp-box input::placeholder { color: #4b5563; }
+  .inp-box input:focus {
+    border-color: var(--clr-a);
+    background: rgba(0, 240, 255, 0.08);
+  }
+  .ico-left {
+    position: absolute; left: 13px; top: 13px;
+    color: var(--clr-a); font-size: 14px;
+    pointer-events: none;
+  }
+  .eye-btn {
+    position: absolute;
+    right: 8px; top: 8px;
+    width: 30px; height: 30px;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 13px;
+    transition: color 0.2s, background 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .eye-btn:hover { color: var(--clr-a); background: rgba(0, 240, 255, 0.08); }
+
+  .forgot-link {
+    text-align: right;
+    margin: -6px 0 14px 0;
+    font-size: 11px;
+  }
+  .forgot-link a {
+    color: #7dd3fc;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    font-family: 'Courier New', monospace;
+    transition: color 0.2s;
+  }
+  .forgot-link a:hover { color: var(--clr-a); }
+
+  .act-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    position: relative; overflow: hidden;
+  }
+  .act-btn-main {
+    background: linear-gradient(135deg, var(--clr-c), var(--clr-b), var(--clr-a));
+    box-shadow: 0 0 15px rgba(255, 0, 229, 0.3);
+  }
+  .act-btn-main:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+  .act-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+  .or-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 16px;
+    color: #64748b;
+    font-size: 10.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+  }
+  .or-divider::before,
+  .or-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.35), transparent);
+  }
+
+  .google-btn {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+    background: rgba(255, 255, 255, 0.04);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .google-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--clr-a);
+    transform: translateY(-2px);
+  }
+  .google-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+  .google-btn .g-icon {
+    background: #fff;
+    color: #4285f4;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 14px;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .err-msg, .ok-msg {
+    margin-top: 14px;
+    padding: 11px 13px;
+    border-radius: 10px;
+    font-size: 11.5px;
+    line-height: 1.6;
+    display: none;
+    font-family: 'Courier New', monospace;
+    word-break: break-word;
+    text-align: left;
+  }
+  .err-msg.show, .ok-msg.show { display: block; }
+  .err-msg {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #fca5a5;
+  }
+  .ok-msg {
+    background: rgba(0, 255, 157, 0.08);
+    border: 1px solid rgba(0, 255, 157, 0.4);
+    color: #86efac;
+  }
+
+  .ring {
+    display: inline-block;
+    width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,0.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: rotate 0.8s linear infinite;
+    vertical-align: -2px;
+  }
+  @keyframes rotate { to { transform: rotate(360deg); } }
+
+  .loader-state { padding: 20px 0; }
+  .loader-state .ring {
+    width: 40px; height: 40px;
+    border-width: 3px;
+    border-top-color: var(--clr-a);
+    border-right-color: var(--clr-b);
+  }
+  .loader-state p {
+    margin-top: 16px;
+    color: #94a3b8;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+  }
+
+  .foot-note {
+    margin-top: 20px;
+    font-size: 10.5px;
+    color: #475569;
+    letter-spacing: 0.5px;
+    font-family: 'Courier New', monospace;
+    line-height: 1.9;
+  }
+  .foot-note .brand-tag {
+    color: var(--clr-a); font-weight: 700;
+  }
+  .foot-note a {
+    color: var(--clr-b); text-decoration: none; font-weight: 700;
+  }
+
+  @media (max-width: 520px) {
+    .card-box { padding: 26px 20px 22px; }
+    .brand-name { font-size: 19px; letter-spacing: 2px; }
+    .brand-logo { width: 80px; height: 80px; }
+    .auth-tab { font-size: 11px; letter-spacing: 1px; padding: 9px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grd-bg"></div>
+
+<div class="page-wrap">
+  <div class="card-box">
+
+    <div class="brand-logo">
+      <img src="image/am.png" alt="AM Logo"
+        onerror="this.replaceWith(Object.assign(document.createElement('i'),{className:'fa-solid fa-shield-halved',style:'font-size:60px;color:#fff;'}))">
+    </div>
+    <div class="brand-name">AM Premium</div>
+    <div class="brand-sub">Alight Motion Premium API</div>
+
+    <div class="login-divider"></div>
+
+    <div id="loadingState" class="loader-state">
+      <div class="ring"></div>
+      <p>Memeriksa sesi...</p>
+    </div>
+
+    <div id="authState" style="display:none;">
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">
+          <i class="fa-solid fa-right-to-bracket"></i> Login
+        </button>
+        <button class="auth-tab" data-tab="register">
+          <i class="fa-solid fa-user-plus"></i> Register
+        </button>
+      </div>
+
+      <div class="auth-form active" id="form-login">
+        <div class="lbl-row"><i class="fa-solid fa-at"></i> Email</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-envelope ico-left"></i>
+          <input type="email" id="loginEmail" placeholder="contoh@gmail.com" autocomplete="email">
+        </div>
+
+        <div class="lbl-row"><i class="fa-solid fa-lock"></i> Password</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-key ico-left"></i>
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+          <button class="eye-btn" data-target="loginPassword" type="button">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+
+        <div class="forgot-link">
+          <a href="#" id="forgotPass">Lupa password?</a>
+        </div>
+
+        <button class="act-btn act-btn-main" id="btnLogin">
+          <i class="fa-solid fa-right-to-bracket"></i> Masuk
+        </button>
+      </div>
+
+      <div class="auth-form" id="form-register">
+        <div class="lbl-row"><i class="fa-solid fa-user"></i> Username</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-user ico-left"></i>
+          <input type="text" id="regUsername" placeholder="username lu" autocomplete="username">
+        </div>
+
+        <div class="lbl-row"><i class="fa-solid fa-at"></i> Email</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-envelope ico-left"></i>
+          <input type="email" id="regEmail" placeholder="contoh@gmail.com" autocomplete="email">
+        </div>
+
+        <div class="lbl-row"><i class="fa-solid fa-lock"></i> Password</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-key ico-left"></i>
+          <input type="password" id="regPassword" placeholder="Min. 6 karakter" autocomplete="new-password">
+          <button class="eye-btn" data-target="regPassword" type="button">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+
+        <div class="lbl-row"><i class="fa-solid fa-lock"></i> Konfirmasi Password</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-key ico-left"></i>
+          <input type="password" id="regConfirm" placeholder="Ulangi password" autocomplete="new-password">
+          <button class="eye-btn" data-target="regConfirm" type="button">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+
+        <button class="act-btn act-btn-main" id="btnRegister">
+          <i class="fa-solid fa-user-plus"></i> Daftar
+        </button>
+      </div>
+
+      <div class="err-msg" id="errBox"></div>
+      <div class="ok-msg" id="okBox"></div>
+
+      <div class="or-divider"><span>atau</span></div>
+
+      <button class="google-btn" id="btnGoogle">
+        <span class="g-icon">G</span>
+        Sign in with Google
+      </button>
+
+    </div>
+
+    <div class="foot-note">
+      © 2026 <span class="brand-tag">XyncTeam</span> — All Rights Reserved<br>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  const API        = 'https://api-logingoogle-amprem.vercel.app/api/v1/auth';
+  const GOOGLE_URL = 'https://api-logingoogle-amprem.vercel.app/api/v1/auth?auth';
+  const STORE      = 'xync_auth';
+
+  async function api(q, body, token) {
+    const opt = { method: body ? 'POST' : 'GET', headers: {} };
+    if (body) {
+      opt.headers['Content-Type'] = 'application/json';
+      opt.body = JSON.stringify(body);
+    }
+    if (token) opt.headers.Authorization = 'Bearer ' + token;
+    let r;
+    try {
+      r = await fetch(API + '?' + q, opt);
+    } catch {
+      const e = new Error('❌ Koneksi ke server gagal. Cek internet lu.');
+      e.status = 0;
+      throw e;
+    }
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.ok) {
+      const e = new Error(d.msg || ('❌ Error ' + r.status));
+      e.status = r.status;
+      throw e;
+    }
+    return d;
+  }
+
+  function loadSession() {
+    try { return JSON.parse(localStorage.getItem(STORE)) || null; } catch { return null; }
+  }
+
+  function saveSession(d) {
+    if (!d || !d.idToken) return;
+    const old = loadSession() || {};
+    localStorage.setItem(STORE, JSON.stringify({
+      idToken: d.idToken,
+      refreshToken: d.refreshToken || old.refreshToken || null,
+      exp: Date.now() + (Number(d.expiresIn) || 3600) * 1000
+    }));
+  }
+
+  function clearSession() {
+    try { localStorage.removeItem(STORE); } catch {}
+  }
+
+  async function getMe() {
+    const s = loadSession();
+    if (!s || !s.idToken) {
+      const e = new Error('Belum login');
+      e.status = 401;
+      throw e;
+    }
+    if (s.exp - Date.now() > 60000) {
+      try {
+        return await api('me', null, s.idToken);
+      } catch (e) {
+        if (e.status !== 401 || !s.refreshToken) throw e;
+      }
+    }
+    if (!s.refreshToken) {
+      clearSession();
+      const e = new Error('Session habis');
+      e.status = 401;
+      throw e;
+    }
+    try {
+      const d = await api('refresh', { refreshToken: s.refreshToken });
+      saveSession(d);
+      return d;
+    } catch (e) {
+      if (e.status !== 0) clearSession();
+      throw e;
+    }
+  }
+
+  function readHash() {
+    if (!location.hash || location.hash.length < 2) return null;
+    const h = new URLSearchParams(location.hash.slice(1));
+    if (!h.has('idToken') && !h.has('auth_error')) return null;
+    history.replaceState(null, '', location.pathname + location.search);
+    if (h.get('auth_error')) return { error: h.get('auth_error') };
+    saveSession({ idToken: h.get('idToken'), refreshToken: h.get('refreshToken'), expiresIn: h.get('expiresIn') });
+    return { ok: true };
+  }
+
+  const loadingState = document.getElementById('loadingState');
+  const authState    = document.getElementById('authState');
+  const errBox       = document.getElementById('errBox');
+  const okBox        = document.getElementById('okBox');
+
+  function showError(msg) {
+    errBox.textContent = /^❌/.test(msg) ? msg : '❌ ' + msg;
+    errBox.classList.add('show');
+    okBox.classList.remove('show');
+  }
+  function showOK(msg) {
+    okBox.textContent = msg;
+    okBox.classList.add('show');
+    errBox.classList.remove('show');
+  }
+  function clearMsgs() {
+    errBox.classList.remove('show');
+    okBox.classList.remove('show');
+    errBox.textContent = '';
+    okBox.textContent = '';
+  }
+  function setBusy(btn, busy, originalHTML) {
+    btn.disabled = busy;
+    btn.innerHTML = busy ? '<span class="ring"></span> Loading...' : originalHTML;
+  }
+  function goDashboard() {
+    window.location.replace('dashboard.html');
+  }
+  function showForm() {
+    loadingState.style.display = 'none';
+    authState.style.display = 'block';
+  }
+
+  async function boot() {
+    const back = readHash();
+    if (back && back.error) {
+      showForm();
+      return showError(back.error);
+    }
+    try {
+      await getMe();
+      goDashboard();
+    } catch (e) {
+      showForm();
+      if (back && back.ok) showError(e.message);
+      else if (e.status === 0) showError(e.message);
+    }
+  }
+
+  boot();
+  window.addEventListener('hashchange', boot);
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+      const g = document.getElementById('btnGoogle');
+      g.disabled = false;
+      g.innerHTML = '<span class="g-icon">G</span> Sign in with Google';
+    }
+  });
+
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('form-' + target).classList.add('active');
+      clearMsgs();
+    });
+  });
+
+  document.querySelectorAll('.eye-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      const icon  = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.add('fa-eye');
+        icon.classList.remove('fa-eye-slash');
+      }
+    });
+  });
+
+  document.getElementById('btnLogin').addEventListener('click', async () => {
+    const btn   = document.getElementById('btnLogin');
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPassword').value;
+    const orig  = '<i class="fa-solid fa-right-to-bracket"></i> Masuk';
+    clearMsgs();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return showError('❌ Masukkan email yang valid!');
+    }
+    if (!pass) return showError('❌ Password wajib diisi!');
+
+    setBusy(btn, true);
+    try {
+      const d = await api('login', { email, password: pass });
+      saveSession(d);
+      goDashboard();
+    } catch (e) {
+      showError(e.message);
+      setBusy(btn, false, orig);
+    }
+  });
+
+  document.getElementById('btnRegister').addEventListener('click', async () => {
+    const btn      = document.getElementById('btnRegister');
+    const username = document.getElementById('regUsername').value.trim();
+    const email    = document.getElementById('regEmail').value.trim();
+    const pass     = document.getElementById('regPassword').value;
+    const confirm  = document.getElementById('regConfirm').value;
+    const orig     = '<i class="fa-solid fa-user-plus"></i> Daftar';
+    clearMsgs();
+
+    if (!username || username.length < 3) {
+      return showError('❌ Username minimal 3 karakter!');
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return showError('❌ Email tidak valid!');
+    }
+    if (!pass || pass.length < 6) {
+      return showError('❌ Password minimal 6 karakter!');
+    }
+    if (pass !== confirm) {
+      return showError('❌ Konfirmasi password tidak cocok!');
+    }
+
+    setBusy(btn, true);
+    try {
+      const d = await api('cAccount', { email, password: pass, name: username });
+      saveSession(d);
+      showOK('✅ Registrasi berhasil! Mengalihkan ke dashboard...');
+      setTimeout(goDashboard, 900);
+    } catch (e) {
+      showError(e.message);
+      setBusy(btn, false, orig);
+    }
+  });
+
+  document.getElementById('btnGoogle').addEventListener('click', () => {
+    const btn = document.getElementById('btnGoogle');
+    clearMsgs();
+    setBusy(btn, true);
+    const hosted = /^https?:$/.test(location.protocol);
+    window.location.href = hosted
+      ? GOOGLE_URL + '&redirect=' + encodeURIComponent(location.origin + location.pathname)
+      : GOOGLE_URL;
+  });
+
+  document.getElementById('forgotPass').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    clearMsgs();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return showError('❌ Isi kolom email dulu untuk reset password.');
+    }
+
+    try {
+      await api('reset', { email });
+      showOK('✅ Link reset password dikirim ke ' + email + '. Cek inbox/spam.');
+    } catch (e2) {
+      showError(e2.message);
+    }
+  });
+
+  document.getElementById('loginPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btnLogin').click();
+  });
+  document.getElementById('regConfirm').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btnRegister').click();
+  });
+</script>
+</body>
+</html>

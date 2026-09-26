@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AM Premium — Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="icon" href="image/am.png" type="image/png">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --clr-a: #00f0ff; --clr-b: #ff00e5; --clr-c: #9d00ff; --clr-d: #00ff9d; --clr-base: #05010f; }
+  html { height: 100%; }
+  body {
+    min-height: 100vh; display: flex; flex-direction: column;
+    font-family: 'Segoe UI', 'Courier New', monospace;
+    background: var(--clr-base); color: #e0f7ff;
+    overflow-x: hidden; visibility: hidden; padding-bottom: 100px;
+  }
+  body.sess-ok { visibility: visible; }
+  .grd-bg {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,240,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,0,229,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0; pointer-events: none;
+  }
+  .glow-blob { display: none; }
+  .lines-overlay { display: none; }
+  .top-avatar-wrap { position: fixed; top: 16px; right: 16px; z-index: 60; display: none; cursor: pointer; }
+  .top-avatar-wrap.show { display: block; }
+  .top-avatar { position: relative; width: 52px; height: 52px; border-radius: 50%; }
+  .top-avatar-wrap:hover .top-avatar { transform: scale(1.05); }
+  .top-avatar-wrap:active .top-avatar { transform: scale(0.97); }
+  .top-avatar::before {
+    content: ""; position: absolute; inset: -3px; border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--clr-a), var(--clr-b), var(--clr-c), var(--clr-a));
+    z-index: -1;
+  }
+  .top-avatar::after { content: ""; position: absolute; inset: -1px; border-radius: 50%; background: rgba(10,5,25,1); z-index: -1; }
+  .top-avatar .avatar-inner { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 20px; background: linear-gradient(135deg, var(--clr-c), var(--clr-b)); box-shadow: 0 0 14px rgba(0, 240, 255, 0.4); }
+  .top-avatar .avatar-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .top-avatar-wrap .online-dot { position: absolute; bottom: 2px; right: 2px; width: 13px; height: 13px; border-radius: 50%; background: var(--clr-d); border: 2px solid rgba(10,5,25,1); box-shadow: 0 0 8px var(--clr-d); z-index: 2; }
+  .page-wrap { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 16px; gap: 18px; }
+  .tab-page { display: none; width: 100%; flex-direction: column; align-items: center; gap: 18px; }
+  .tab-page.active { display: flex; }
+  .card-box { width: 100%; max-width: 560px; background: rgba(10, 5, 25, 0.82); border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 18px; padding: 30px 26px 24px; box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), 0 0 40px rgba(157, 0, 255, 0.12); position: relative; overflow: hidden; }
+  .top-area { text-align: center; margin-bottom: 22px; }
+  .brand-logo { width: 90px; height: 90px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 10px var(--clr-a)); }
+  .brand-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .brand-name { font-size: 22px; font-weight: 800; letter-spacing: 3px; background: linear-gradient(90deg, var(--clr-a), var(--clr-b), var(--clr-c)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-transform: uppercase; }
+  .brand-sub { color: #7dd3fc; font-size: 11.5px; margin-top: 5px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.75; }
+  .progress-bar { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 22px; }
+  .prog-node { display: flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 30px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border: 1px solid rgba(0, 240, 255, 0.25); color: #64748b; transition: all 0.3s; }
+  .prog-node i { font-size: 12px; }
+  .prog-node.active { color: #fff; border-color: var(--clr-a); background: linear-gradient(90deg, rgba(0,240,255,0.15), rgba(255,0,229,0.15)); box-shadow: 0 0 12px rgba(0, 240, 255, 0.3); }
+  .prog-node.done { color: var(--clr-d); border-color: rgba(0, 255, 157, 0.5); }
+  .prog-arrow { color: rgba(0, 240, 255, 0.35); font-size: 12px; }
+  .view-section { display: none; }
+  .view-section.active { display: block; }
+  .lbl-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--clr-a); margin-bottom: 8px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; }
+  .lbl-row i { font-size: 12px; }
+  .inp-box { position: relative; margin-bottom: 18px; }
+  .inp-box input, .inp-box textarea { width: 100%; padding: 14px 14px 14px 44px; background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 10px; color: #e0f7ff; font-size: 14px; font-family: 'Courier New', monospace; outline: none; transition: border-color 0.2s, background 0.2s; resize: vertical; }
+  .inp-box textarea { min-height: 90px; padding-top: 14px; }
+  .inp-box input::placeholder, .inp-box textarea::placeholder { color: #4b5563; font-family: 'Courier New', monospace; }
+  .inp-box input:focus, .inp-box textarea:focus { border-color: var(--clr-a); background: rgba(0, 240, 255, 0.08); }
+  .ico-left { position: absolute; left: 14px; top: 15px; color: var(--clr-a); font-size: 15px; pointer-events: none; }
+  .inp-box textarea + .ico-left { top: 15px; }
+  .act-btn { width: 100%; padding: 15px; border: none; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; font-family: inherit; position: relative; overflow: hidden; transition: transform 0.2s; }
+  .act-btn-main { background: linear-gradient(135deg, var(--clr-c), var(--clr-b), var(--clr-a)); box-shadow: 0 0 15px rgba(255, 0, 229, 0.3); }
+  .act-btn-main:hover:not(:disabled) { transform: translateY(-2px); }
+  .act-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+  .act-btn-back { background: transparent; border: 1px solid rgba(0, 240, 255, 0.3); color: #7dd3fc; margin-top: 10px; font-size: 12px; padding: 11px; letter-spacing: 1.5px; }
+  .act-btn-back:hover { border-color: var(--clr-a); background: rgba(0, 240, 255, 0.08); }
+  .msg-box { margin-top: 18px; padding: 14px 16px; border-radius: 10px; font-size: 12.5px; line-height: 1.65; display: none; word-break: break-word; font-family: 'Courier New', monospace; }
+  .msg-box.show { display: block; }
+  .msg-box.ok { background: rgba(0, 255, 157, 0.08); border: 1px solid rgba(0, 255, 157, 0.4); color: #86efac; }
+  .msg-box.fail { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.45); color: #fca5a5; }
+  .msg-box.pend { background: rgba(0, 240, 255, 0.06); border: 1px solid rgba(0, 240, 255, 0.4); color: #93c5fd; }
+  .msg-box pre { background: rgba(0, 0, 0, 0.5); padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 11px; margin-top: 8px; border: 1px solid rgba(0, 240, 255, 0.2); }
+  .tut-card { width: 100%; max-width: 560px; background: rgba(10, 5, 25, 0.82); border: 1px solid rgba(157, 0, 255, 0.4); border-radius: 18px; padding: 24px 22px 22px; box-shadow: 0 0 20px rgba(157, 0, 255, 0.15); position: relative; overflow: hidden; }
+  .tut-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px dashed rgba(0, 240, 255, 0.25); }
+  .tut-header .tut-icon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, rgba(157, 0, 255, 0.3), rgba(255, 0, 229, 0.3)); border: 1px solid rgba(0, 240, 255, 0.4); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; }
+  .tut-header .tut-title-box { text-align: left; }
+  .tut-header .tut-title { font-size: 15px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(90deg, var(--clr-a), var(--clr-c), var(--clr-b)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .tut-header .tut-sub { font-size: 10.5px; color: #94a3b8; letter-spacing: 1px; margin-top: 2px; text-transform: uppercase; font-family: 'Courier New', monospace; }
+  .tut-step { display: flex; gap: 12px; padding: 12px 0; position: relative; text-align: left; }
+  .tut-step:not(:last-child) { border-bottom: 1px solid rgba(0, 240, 255, 0.08); }
+  .tut-num { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--clr-c), var(--clr-b)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; flex-shrink: 0; border: 2px solid rgba(0, 240, 255, 0.5); font-family: 'Segoe UI', sans-serif; }
+  .tut-body { flex: 1; min-width: 0; }
+  .tut-body .tut-name { font-size: 12.5px; font-weight: 700; color: #fff; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .tut-body .tut-name i { color: var(--clr-a); font-size: 12px; }
+  .tut-body .tut-desc { font-size: 11.5px; color: #94a3b8; line-height: 1.6; font-family: 'Courier New', monospace; }
+  .tut-body .tut-desc b { color: var(--clr-a); font-weight: 700; }
+  .tut-body .tut-desc code { color: var(--clr-d); background: rgba(0, 255, 157, 0.08); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(0, 255, 157, 0.25); font-size: 10.5px; }
+  .tut-note { margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.25); font-size: 11px; color: #93c5fd; line-height: 1.7; text-align: left; font-family: 'Courier New', monospace; display: flex; gap: 10px; align-items: flex-start; }
+  .tut-note i { color: var(--clr-a); font-size: 14px; margin-top: 1px; flex-shrink: 0; }
+  .tut-warn { margin-top: 10px; padding: 12px 14px; border-radius: 10px; background: rgba(251, 191, 36, 0.06); border: 1px solid rgba(251, 191, 36, 0.35); font-size: 11px; color: #fcd34d; line-height: 1.7; text-align: left; font-family: 'Courier New', monospace; display: flex; gap: 10px; align-items: flex-start; }
+  .tut-warn i { color: #fbbf24; font-size: 14px; margin-top: 1px; flex-shrink: 0; }
+  .tt-card { width: 100%; max-width: 560px; background: rgba(10, 5, 25, 0.82); border: 1px solid rgba(255, 0, 229, 0.4); border-radius: 18px; padding: 30px 26px 24px; box-shadow: 0 0 20px rgba(255, 0, 229, 0.15); position: relative; overflow: hidden; }
+  .tt-header { text-align: center; margin-bottom: 22px; }
+  .tt-logo { width: 80px; height: 80px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 10px var(--clr-b)); }
+  .tt-logo i { font-size: 58px; color: #fff; text-shadow: 0 0 15px var(--clr-a); }
+  .tt-name { font-size: 22px; font-weight: 800; letter-spacing: 3px; background: linear-gradient(90deg, var(--clr-b), var(--clr-c), var(--clr-a)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-transform: uppercase; }
+  .tt-sub { color: #f0abfc; font-size: 11.5px; margin-top: 5px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.75; }
+  .tt-src-lbl { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 8px; }
+  .tt-src-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background: rgba(255, 0, 229, 0.04); border: 1px solid rgba(255, 0, 229, 0.25); border-radius: 12px; padding: 4px; }
+  .tt-src { padding: 9px 4px; background: transparent; border: none; color: #64748b; font-family: inherit; font-size: 10px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; cursor: pointer; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; transition: all 0.2s; }
+  .tt-src i { font-size: 12px; }
+  .tt-src small { font-size: 8px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.7; text-transform: none; }
+  .tt-src.active { background: linear-gradient(135deg, rgba(255, 0, 229, 0.35), rgba(0, 240, 255, 0.3)); color: #fff; box-shadow: 0 0 10px rgba(255, 0, 229, 0.25); }
+  .tt-src:hover:not(.active) { color: #cbd5e1; background: rgba(255, 0, 229, 0.06); }
+  .tt-src-hint { font-size: 10px; color: #94a3b8; font-family: 'Courier New', monospace; margin-top: 7px; margin-bottom: 16px; line-height: 1.5; min-height: 14px; }
+  .tt-src-hint b { color: #f0abfc; }
+  .tt-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tt-badge { font-size: 9.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 9px; border-radius: 20px; font-family: 'Courier New', monospace; border: 1px solid rgba(0, 240, 255, 0.35); color: #7dd3fc; background: rgba(0, 240, 255, 0.06); }
+  .tt-badge.hd { border-color: rgba(0, 255, 157, 0.5); color: #86efac; background: rgba(0, 255, 157, 0.08); }
+  .tt-badge.sd { border-color: rgba(251, 191, 36, 0.5); color: #fcd34d; background: rgba(251, 191, 36, 0.08); }
+  .tt-badge.src { border-color: rgba(255, 0, 229, 0.5); color: #f0abfc; background: rgba(255, 0, 229, 0.08); }
+  .tt-result { margin-top: 20px; display: none; }
+  .tt-result.show { display: block; }
+  .tt-info-card { background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .tt-author { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(0, 240, 255, 0.15); }
+  .tt-author-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--clr-a); object-fit: cover; flex-shrink: 0; background: linear-gradient(135deg, var(--clr-c), var(--clr-b)); display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 18px; }
+  .tt-author-info { flex: 1; min-width: 0; text-align: left; }
+  .tt-author-name { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tt-author-handle { font-size: 11px; color: #94a3b8; margin-top: 2px; font-family: 'Courier New', monospace; }
+  .tt-stats { display: flex; gap: 14px; justify-content: space-around; text-align: center; }
+  .tt-stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .tt-stat i { color: var(--clr-a); font-size: 13px; }
+  .tt-stat .num { font-size: 13px; font-weight: 700; color: #fff; font-family: 'Courier New', monospace; }
+  .tt-stat .lbl { font-size: 9px; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; }
+  .tt-title { font-size: 12.5px; color: #e0f7ff; line-height: 1.6; margin-bottom: 12px; text-align: left; font-family: 'Courier New', monospace; padding: 10px 12px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border-left: 3px solid var(--clr-a); word-break: break-word; }
+  .tt-cover-wrap { position: relative; border-radius: 12px; overflow: hidden; margin-bottom: 14px; border: 1px solid rgba(0, 240, 255, 0.25); background: #000; display: flex; align-items: center; justify-content: center; min-height: 200px; }
+  .tt-cover-wrap img, .tt-cover-wrap video { width: 100%; max-height: 400px; object-fit: contain; display: block; }
+  .tt-dl-group { display: flex; flex-direction: column; gap: 9px; }
+  .tt-dl-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 13px; border-radius: 10px; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; color: #fff; font-family: inherit; transition: transform 0.2s; position: relative; overflow: hidden; border: none; cursor: pointer; }
+  .tt-dl-btn-primary { background: linear-gradient(135deg, var(--clr-c), var(--clr-b), var(--clr-a)); box-shadow: 0 0 15px rgba(255, 0, 229, 0.3); }
+  .tt-dl-btn-primary:hover { transform: translateY(-2px); }
+  .tt-dl-btn-secondary { background: transparent; border: 1px solid rgba(0, 240, 255, 0.4); color: #7dd3fc; }
+  .tt-dl-btn-secondary:hover { background: rgba(0, 240, 255, 0.08); border-color: var(--clr-a); color: #fff; }
+  .tt-slides { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .tt-slide-item { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid rgba(0, 240, 255, 0.25); background: #000; aspect-ratio: 1 / 1; }
+  .tt-slide-item:hover { border-color: var(--clr-a); }
+  .tt-slide-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tt-slide-item .slide-dl { position: absolute; bottom: 6px; right: 6px; width: 32px; height: 32px; border-radius: 50%; background: rgba(10, 5, 25, 0.9); border: 1px solid var(--clr-a); color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 12px; }
+  .tt-slide-item .slide-dl:hover { background: var(--clr-a); color: #000; }
+  .tt-slide-item .slide-num { position: absolute; top: 6px; left: 6px; background: rgba(10, 5, 25, 0.9); border: 1px solid rgba(0, 240, 255, 0.4); color: var(--clr-a); padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; font-family: 'Courier New', monospace; }
+  .tm-card { width: 100%; max-width: 560px; background: rgba(10, 5, 25, 0.82); border: 1px solid rgba(0, 255, 157, 0.4); border-radius: 18px; padding: 30px 26px 24px; box-shadow: 0 0 20px rgba(0, 255, 157, 0.15); position: relative; overflow: hidden; }
+  .tm-header { text-align: center; margin-bottom: 22px; }
+  .tm-logo { width: 80px; height: 80px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 10px var(--clr-d)); }
+  .tm-logo i { font-size: 52px; color: #fff; text-shadow: 0 0 15px var(--clr-d); }
+  .tm-name { font-size: 22px; font-weight: 800; letter-spacing: 3px; background: linear-gradient(90deg, var(--clr-d), var(--clr-a), var(--clr-c)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-transform: uppercase; }
+  .tm-sub { color: #6ee7b7; font-size: 11.5px; margin-top: 5px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.75; }
+  .tm-email-show { background: rgba(0, 255, 157, 0.06); border: 1px solid rgba(0, 255, 157, 0.4); border-radius: 12px; padding: 14px 14px 14px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .tm-email-show.empty { opacity: 0.5; }
+  .tm-email-show .tm-icon-box { width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg, rgba(0, 255, 157, 0.25), rgba(0, 240, 255, 0.2)); border: 1px solid rgba(0, 255, 157, 0.5); display: flex; align-items: center; justify-content: center; color: var(--clr-d); font-size: 15px; flex-shrink: 0; }
+  .tm-email-show .tm-email-txt { flex: 1; min-width: 0; font-family: 'Courier New', monospace; font-size: 13px; color: #fff; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: 0.3px; }
+  .tm-copy-btn { width: 34px; height: 34px; border-radius: 8px; background: transparent; border: 1px solid rgba(0, 255, 157, 0.5); color: var(--clr-d); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tm-copy-btn:hover { background: rgba(0, 255, 157, 0.15); }
+  .tm-copy-btn.copied { background: rgba(0, 255, 157, 0.25); color: #fff; }
+  .tm-copy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .tm-tabs { display: flex; background: rgba(0, 255, 157, 0.04); border: 1px solid rgba(0, 255, 157, 0.25); border-radius: 12px; padding: 4px; margin-bottom: 16px; }
+  .tm-tab { flex: 1; padding: 9px 8px; background: transparent; border: none; color: #64748b; font-family: inherit; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .tm-tab i { font-size: 12px; }
+  .tm-tab.active { background: linear-gradient(135deg, rgba(0, 255, 157, 0.3), rgba(0, 240, 255, 0.3)); color: #fff; }
+  .tm-tab:hover:not(.active) { color: #cbd5e1; background: rgba(0, 255, 157, 0.06); }
+  .tm-panel { display: none; }
+  .tm-panel.active { display: block; }
+  .tm-domain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin-bottom: 14px; max-height: 160px; overflow-y: auto; padding-right: 4px; }
+  .tm-domain-item { padding: 8px 10px; background: rgba(0, 255, 157, 0.04); border: 1px solid rgba(0, 255, 157, 0.2); border-radius: 8px; color: #94a3b8; font-size: 11px; font-family: 'Courier New', monospace; cursor: pointer; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tm-domain-item:hover { background: rgba(0, 255, 157, 0.08); border-color: rgba(0, 255, 157, 0.5); color: #fff; }
+  .tm-domain-item.selected { background: linear-gradient(135deg, rgba(0, 255, 157, 0.2), rgba(0, 240, 255, 0.2)); border-color: var(--clr-d); color: #fff; }
+  .tm-inbox-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; margin-top: 6px; flex-wrap: wrap; }
+  .tm-inbox-title { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--clr-d); font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; }
+  .tm-inbox-title i { font-size: 12px; }
+  .tm-refresh-btn { background: transparent; border: 1px solid rgba(0, 255, 157, 0.35); color: var(--clr-d); padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+  .tm-refresh-btn:hover { background: rgba(0, 255, 157, 0.1); border-color: var(--clr-d); }
+  .tm-refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .tm-refresh-btn.spinning i { animation: rotate 0.8s linear infinite; }
+  @keyframes rotate { to { transform: rotate(360deg); } }
+  .tm-auto-refresh { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #94a3b8; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; user-select: none; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(0, 255, 157, 0.25); background: rgba(0, 255, 157, 0.03); }
+  .tm-auto-refresh:hover { background: rgba(0, 255, 157, 0.08); border-color: rgba(0, 255, 157, 0.5); }
+  .tm-auto-refresh input[type="checkbox"] { display: none; }
+  .tm-auto-refresh .tm-auto-box { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid rgba(0, 255, 157, 0.5); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tm-auto-refresh .tm-auto-box i { font-size: 10px; opacity: 0; color: #05010f; }
+  .tm-auto-refresh input:checked + .tm-auto-box { background: var(--clr-d); border-color: var(--clr-d); }
+  .tm-auto-refresh input:checked + .tm-auto-box i { opacity: 1; }
+  .tm-auto-refresh.active { color: var(--clr-d); border-color: var(--clr-d); background: rgba(0, 255, 157, 0.1); }
+  .tm-inbox { display: flex; flex-direction: column; gap: 8px; min-height: 100px; }
+  .tm-empty { text-align: center; padding: 24px 16px; color: #64748b; font-size: 11.5px; font-family: 'Courier New', monospace; border: 1px dashed rgba(0, 255, 157, 0.2); border-radius: 10px; background: rgba(0, 255, 157, 0.02); }
+  .tm-empty i { display: block; font-size: 28px; color: rgba(0, 255, 157, 0.4); margin-bottom: 8px; }
+  .tm-msg { background: rgba(0, 255, 157, 0.04); border: 1px solid rgba(0, 255, 157, 0.25); border-radius: 10px; padding: 11px 13px; cursor: pointer; text-align: left; }
+  .tm-msg:hover { background: rgba(0, 255, 157, 0.08); border-color: rgba(0, 255, 157, 0.5); }
+  .tm-msg-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .tm-msg-from { font-size: 12px; color: #fff; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tm-msg-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--clr-d); flex-shrink: 0; }
+  .tm-msg-subject { font-size: 11px; color: #cbd5e1; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Courier New', monospace; }
+  .tm-msg-date { font-size: 9.5px; color: #64748b; font-family: 'Courier New', monospace; letter-spacing: 0.5px; }
+  .tm-msg-body { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(0, 255, 157, 0.2); font-size: 11px; color: #94a3b8; font-family: 'Courier New', monospace; line-height: 1.6; max-height: 260px; overflow-y: auto; word-break: break-word; }
+  .tm-msg.open .tm-msg-body { display: block; }
+  .tm-link-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; margin-right: 6px; padding: 7px 12px; border-radius: 8px; background: linear-gradient(135deg, var(--clr-c), var(--clr-b), var(--clr-a)); color: #fff; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border: none; cursor: pointer; font-family: inherit; }
+  .tm-link-btn:hover { transform: translateY(-1px); }
+  .tm-action-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tm-action-btn { flex: 1; padding: 10px 8px; border-radius: 9px; background: transparent; border: 1px solid rgba(0, 255, 157, 0.35); color: var(--clr-d); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .tm-action-btn i { font-size: 11px; }
+  .tm-action-btn:hover:not(:disabled) { background: rgba(0, 255, 157, 0.1); border-color: var(--clr-d); }
+  .tm-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .tm-action-btn.danger { border-color: rgba(255, 0, 229, 0.4); color: var(--clr-b); }
+  .tm-action-btn.danger:hover:not(:disabled) { background: rgba(255, 0, 229, 0.1); border-color: var(--clr-b); }
+  .api-wrap { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 18px; }
+  .api-card { width: 100%; background: rgba(10, 5, 25, 0.82); border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 18px; padding: 22px 20px 20px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.12); position: relative; overflow: hidden; }
+  .api-card.api-am { border-color: rgba(157, 0, 255, 0.4); }
+  .api-card.api-tiktok { border-color: rgba(255, 0, 229, 0.4); }
+  .api-card.api-spotify { border-color: rgba(29, 185, 84, 0.4); }
+  .api-card.api-mail { border-color: rgba(0, 255, 157, 0.4); }
+  .api-head { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px dashed rgba(0, 240, 255, 0.22); }
+  .api-ico { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; overflow: hidden; }
+  .api-ico img { width: 100%; height: 100%; object-fit: contain; display: block; padding: 6px; }
+  .api-am .api-ico { background: linear-gradient(135deg, rgba(157, 0, 255, 0.35), rgba(255, 0, 229, 0.35)); border: 1px solid rgba(157, 0, 255, 0.6); }
+  .api-tiktok .api-ico { background: linear-gradient(135deg, rgba(255, 0, 229, 0.35), rgba(0, 240, 255, 0.35)); border: 1px solid rgba(255, 0, 229, 0.6); }
+  .api-spotify .api-ico { background: linear-gradient(135deg, rgba(29, 185, 84, 0.35), rgba(0, 240, 255, 0.35)); border: 1px solid rgba(29, 185, 84, 0.6); }
+  .api-mail .api-ico { background: linear-gradient(135deg, rgba(0, 255, 157, 0.35), rgba(0, 240, 255, 0.35)); border: 1px solid rgba(0, 255, 157, 0.6); }
+  .api-title-box { flex: 1; min-width: 0; text-align: left; }
+  .api-title { font-size: 14.5px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; background: linear-gradient(90deg, var(--clr-a), var(--clr-b), var(--clr-c)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .api-sub { font-size: 10.5px; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; font-family: 'Courier New', monospace; }
+  .api-item { margin-bottom: 12px; padding: 12px 13px; background: rgba(0, 240, 255, 0.03); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 10px; text-align: left; }
+  .api-item:last-child { margin-bottom: 0; }
+  .api-item-name { font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .api-method { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 9.5px; font-weight: 800; letter-spacing: 1px; font-family: 'Courier New', monospace; }
+  .api-method.get { color: #86efac; background: rgba(0, 255, 157, 0.12); border: 1px solid rgba(0, 255, 157, 0.4); }
+  .api-method.post { color: #93c5fd; background: rgba(0, 240, 255, 0.12); border: 1px solid rgba(0, 240, 255, 0.4); }
+  .api-url { font-size: 10.5px; color: var(--clr-a); font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.55; margin-bottom: 6px; padding: 7px 9px; background: rgba(0, 0, 0, 0.4); border-radius: 6px; border-left: 2px solid var(--clr-a); }
+  .api-desc { font-size: 10.5px; color: #94a3b8; line-height: 1.65; font-family: 'Courier New', monospace; }
+  .api-desc b { color: var(--clr-a); font-weight: 700; }
+  .api-desc code { color: var(--clr-d); background: rgba(0, 255, 157, 0.08); padding: 1px 5px; border-radius: 4px; border: 1px solid rgba(0, 255, 157, 0.25); font-size: 10px; }
+  .api-code-toggle { display: inline-flex; align-items: center; gap: 6px; margin-top: 9px; padding: 6px 11px; border-radius: 7px; background: transparent; border: 1px solid rgba(0, 240, 255, 0.3); color: #7dd3fc; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-family: inherit; }
+  .api-code-toggle:hover { background: rgba(0, 240, 255, 0.08); border-color: var(--clr-a); color: #fff; }
+  .api-code-toggle i { font-size: 9px; transition: transform 0.2s; }
+  .api-code-toggle.open i { transform: rotate(90deg); }
+  .api-code { display: none; margin-top: 9px; padding: 11px 13px; background: rgba(0, 0, 0, 0.65); border-radius: 8px; border: 1px solid rgba(0, 240, 255, 0.22); font-family: 'Courier New', monospace; font-size: 10.5px; line-height: 1.6; color: #cbd5e1; overflow-x: auto; white-space: pre; max-height: 320px; overflow-y: auto; }
+  .api-code.show { display: block; }
+  .api-code::-webkit-scrollbar { height: 6px; width: 6px; }
+  .api-code::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); }
+  .api-code::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.35); border-radius: 3px; }
+  .dl-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; max-width: 560px; background: rgba(10, 5, 25, 0.82); border: 1px solid rgba(0, 240,255, 0.3); border-radius: 14px; padding: 5px; gap: 6px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.1); }
+  .dl-tab { flex: 1; padding: 12px 8px; background: transparent; border: 1px solid transparent; border-radius: 10px; color: #64748b; font-family: inherit; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+  .dl-tab i { font-size: 14px; }
+  .dl-tab.active { background: linear-gradient(135deg, rgba(157, 0, 255, 0.3), rgba(255, 0, 229, 0.25), rgba(0, 240, 255, 0.25)); color: #fff; border-color: var(--clr-a); box-shadow: 0 0 12px rgba(0, 240, 255, 0.25); }
+  .dl-tab:hover:not(.active) { color: #cbd5e1; background: rgba(0, 240, 255, 0.05); }
+  .dl-panel { display: none; width: 100%; flex-direction: column; align-items: center; }
+  .dl-panel.active { display: flex; }
+  .sp-card { width: 100%; max-width: 560px; background: rgba(10, 5, 25, 0.82); border: 1px solid rgba(0, 255, 157, 0.4); border-radius: 18px; padding: 30px 26px 24px; box-shadow: 0 0 20px rgba(0, 255, 157, 0.15); position: relative; overflow: hidden; }
+  .sp-header { text-align: center; margin-bottom: 22px; }
+  .sp-logo { width: 80px; height: 80px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 10px #1db954); }
+  .sp-logo i { font-size: 58px; color: #1db954; text-shadow: 0 0 15px rgba(29, 185, 84, 0.8); }
+  .sp-name { font-size: 22px; font-weight: 800; letter-spacing: 3px; background: linear-gradient(90deg, #1db954, var(--clr-a), var(--clr-b)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-transform: uppercase; }
+  .sp-sub { color: #6ee7b7; font-size: 11.5px; margin-top: 5px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.75; }
+  .sp-result { margin-top: 20px; display: none; }
+  .sp-result.show { display: block; }
+  .sp-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 9.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-family: 'Courier New', monospace; border: 1px solid rgba(0, 255, 157, 0.5); color: #86efac; background: rgba(0, 255, 157, 0.08); margin-bottom: 12px; }
+  .sp-coll { display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin-bottom: 14px; background: rgba(0, 255, 157, 0.05); border: 1px solid rgba(0, 255, 157, 0.3); border-radius: 14px; }
+  .sp-coll-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, rgba(29, 185, 84, 0.35), rgba(0, 240, 255, 0.25)); border: 1px solid rgba(0, 255, 157, 0.5); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; }
+  .sp-coll-info { flex: 1; min-width: 0; text-align: left; }
+  .sp-coll-title { font-size: 13.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sp-coll-sub { font-size: 10.5px; color: #94a3b8; margin-top: 3px; font-family: 'Courier New', monospace; letter-spacing: 0.5px; }
+  .sp-list { display: flex; flex-direction: column; gap: 8px; }
+  .sp-track { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(0, 255, 157, 0.03); border: 1px solid rgba(0, 255, 157, 0.18); border-radius: 12px; transition: background 0.2s, border-color 0.2s; }
+  .sp-track:hover { background: rgba(0, 255, 157, 0.07); border-color: rgba(0, 255, 157, 0.45); }
+  .sp-track-num { width: 22px; text-align: center; font-family: 'Courier New', monospace; font-size: 11px; color: #64748b; font-weight: 700; flex-shrink: 0; }
+  .sp-track-cover { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(0, 255, 157, 0.35); flex-shrink: 0; background: linear-gradient(135deg, rgba(29, 185, 84, 0.3), rgba(157, 0, 255, 0.3)); }
+  .sp-track-info { flex: 1; min-width: 0; text-align: left; }
+  .sp-track-title { font-size: 12.5px; font-weight: 700; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sp-track-artist { font-size: 10.5px; color: #94a3b8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Courier New', monospace; }
+  .sp-track-dur { font-size: 10.5px; color: #7dd3fc; font-family: 'Courier New', monospace; flex-shrink: 0; }
+  .sp-track-dl { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, rgba(29, 185, 84, 0.3), rgba(0, 240, 255, 0.25)); border: 1px solid rgba(0, 255, 157, 0.5); color: #fff; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.2s, background 0.2s; }
+  .sp-track-dl:hover:not(:disabled) { transform: translateY(-2px); background: linear-gradient(135deg, rgba(29, 185, 84, 0.5), rgba(0, 240, 255, 0.4)); }
+  .sp-track-dl:disabled { opacity: 0.5; cursor: not-allowed; }
+  .sp-dl-box { margin-top: 8px; padding: 12px 14px; background: rgba(0, 0, 0, 0.35); border: 1px dashed rgba(0, 255, 157, 0.4); border-radius: 10px; }
+  .sp-dl-title { font-size: 11px; color: #6ee7b7; font-family: 'Courier New', monospace; margin-bottom: 10px; word-break: break-word; line-height: 1.5; }
+  .sp-dl-btns { display: flex; flex-direction: column; gap: 8px; }
+  .sp-more { text-align: center; font-size: 10.5px; color: #64748b; font-family: 'Courier New', monospace; margin-top: 12px; letter-spacing: 0.5px; line-height: 1.6; }
+  .sp-single { display: flex; align-items: center; gap: 14px; padding: 16px; background: rgba(0, 255, 157, 0.04); border: 1px solid rgba(0, 255, 157, 0.3); border-radius: 14px; margin-bottom: 14px; }
+  .sp-single-cover { width: 84px; height: 84px; border-radius: 12px; object-fit: cover; border: 1px solid rgba(0, 255, 157, 0.45); flex-shrink: 0; }
+  @media (max-width: 520px) {
+    .sp-card { padding: 24px 18px 20px; }
+    .sp-logo { width: 70px; height: 70px; }
+    .sp-logo i { font-size: 48px; }
+    .sp-name { font-size: 19px; letter-spacing: 2px; }
+    .sp-single-cover { width: 64px; height: 64px; }
+    .dl-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dl-tab { font-size: 11px; padding: 10px 6px; }
+  }
+  .sc-theme { width: 100%; display: flex; justify-content: center; }
+  .sc-theme .sp-card { border-color: rgba(255, 138, 61, 0.28); box-shadow: 0 0 10px rgba(255, 138, 61, 0.07); }
+  .sc-theme .sp-logo { filter: drop-shadow(0 0 3px rgba(255, 138, 61, 0.3)); }
+  .sc-theme .sp-logo i { color: #ff8a3d; text-shadow: 0 0 4px rgba(255, 138, 61, 0.2); }
+  .sc-theme .sp-name { background: linear-gradient(90deg, #ff8a3d, #cbd5e1, var(--clr-a)); -webkit-background-clip: text; background-clip: text; }
+  .sc-theme .sp-sub { color: #fdba74; }
+  .sc-theme .sp-badge { border-color: rgba(255, 85, 0, 0.5); color: #fdba74; background: rgba(255, 85, 0, 0.08); }
+  .sc-theme .sp-coll { background: rgba(255, 85, 0, 0.05); border-color: rgba(255, 85, 0, 0.3); }
+  .sc-theme .sp-coll-icon { background: linear-gradient(135deg, rgba(255, 85, 0, 0.35), rgba(0, 240, 255, 0.25)); border-color: rgba(255, 85, 0, 0.5); }
+  .sc-theme .sp-track { background: rgba(255, 85, 0, 0.03); border-color: rgba(255, 85, 0, 0.18); }
+  .sc-theme .sp-track:hover { background: rgba(255, 85, 0, 0.07); border-color: rgba(255, 85, 0, 0.45); }
+  .sc-theme .sp-track-cover { border-color: rgba(255, 85, 0, 0.35); background: linear-gradient(135deg, rgba(255, 85, 0, 0.3), rgba(157, 0, 255, 0.3)); }
+  .sc-theme .sp-track-dl { background: linear-gradient(135deg, rgba(255, 85, 0, 0.3), rgba(0, 240, 255, 0.25)); border-color: rgba(255, 85, 0, 0.5); }
+  .sc-theme .sp-track-dl:hover:not(:disabled) { background: linear-gradient(135deg, rgba(255, 85, 0, 0.5), rgba(0, 240, 255, 0.4)); }
+  .sc-theme .sp-dl-box { border-color: rgba(255, 85, 0, 0.4); }
+  .sc-theme .sp-dl-title { color: #fdba74; }
+  .sc-theme .sp-single { background: rgba(255, 85, 0, 0.04); border-color: rgba(255, 85, 0, 0.3); }
+  .sc-theme .sp-single-cover { border-color: rgba(255, 85, 0, 0.45); }
+  .yt-theme { width: 100%; display: flex; justify-content: center; }
+  .yt-theme .sp-card { border-color: rgba(255, 107, 107, 0.28); box-shadow: 0 0 10px rgba(0, 240, 255, 0.07); }
+  .yt-theme .sp-logo { filter: drop-shadow(0 0 3px rgba(255, 107, 107, 0.28)); }
+  .yt-theme .sp-logo i { color: #ff6b6b; text-shadow: 0 0 4px rgba(255, 107, 107, 0.2); }
+  .yt-theme .sp-name { background: linear-gradient(90deg, #ff7b7b, #c4b5fd, var(--clr-a)); -webkit-background-clip: text; background-clip: text; }
+  .yt-theme .sp-sub { color: #fca5a5; }
+  .yt-auto-hint { margin: -7px 0 16px; color: #94a3b8; font-size: 10.5px; line-height: 1.55; font-family: 'Courier New', monospace; }
+  .yt-auto-hint i { color: #ff4d4d; margin-right: 5px; }
+  .yt-result { display: none; width: 100%; margin-top: 20px; }
+  .yt-result.show { display: block; }
+  .yt-meta { display: flex; gap: 13px; align-items: center; padding: 14px; margin-bottom: 13px; border: 1px solid rgba(255, 48, 48, 0.32); border-radius: 14px; background: rgba(255, 48, 48, 0.045); }
+  .yt-thumb { width: 116px; aspect-ratio: 16 / 9; border-radius: 10px; object-fit: cover; background: #000; border: 1px solid rgba(255, 48, 48, 0.4); flex-shrink: 0; }
+  .yt-meta-body { min-width: 0; flex: 1; text-align: left; }
+  .yt-meta-title { color: #fff; font-size: 12.5px; line-height: 1.45; font-weight: 800; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; word-break: break-word; }
+  .yt-meta-sub { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .yt-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border: 1px solid rgba(255, 48, 48, 0.42); border-radius: 20px; color: #fca5a5; background: rgba(255, 48, 48, 0.08); font-size: 9px; font-weight: 800; letter-spacing: 0.7px; text-transform: uppercase; font-family: 'Courier New', monospace; }
+  .yt-list { display: flex; flex-direction: column; gap: 8px; }
+  .yt-item { display: flex; align-items: center; gap: 10px; padding: 10px 11px; border: 1px solid rgba(0, 240, 255, 0.18); border-radius: 11px; background: rgba(0, 240, 255, 0.03); }
+  .yt-item:hover { border-color: rgba(0, 240, 255, 0.42); background: rgba(0, 240, 255, 0.06); }
+  .yt-item-info { flex: 1; min-width: 0; text-align: left; }
+  .yt-item-name { color: #fff; font-size: 11.5px; font-weight: 800; line-height: 1.4; word-break: break-word; }
+  .yt-item-sub { color: #94a3b8; font-size: 9.5px; margin-top: 3px; font-family: 'Courier New', monospace; }
+  .yt-item .tt-dl-btn { flex-shrink: 0; width: auto; min-width: 120px; padding: 9px 12px; font-size: 9.5px; letter-spacing: 0.8px; }
+  .yt-empty { padding: 18px; text-align: center; color: #94a3b8; border: 1px dashed rgba(0, 240, 255, 0.25); border-radius: 11px; font-size: 11px; font-family: 'Courier New', monospace; }
+  .yt-dl-progress { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 10px; }
+  .yt-dl-progress-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; transition: width 0.15s linear, background 0.25s ease; }
+  .yt-dl-progress-text { position: relative; z-index: 1; font-size: 10.5px; font-weight: 900; letter-spacing: 1px; color: #fff; text-shadow: 0 0 6px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,1); }
+  @media (max-width: 520px) {
+    .yt-meta { align-items: flex-start; }
+    .yt-thumb { width: 96px; }
+    .yt-item { align-items: stretch; flex-direction: column; }
+    .yt-item .tt-dl-btn { width: 100%; min-width: 0; }
+  }
+  .bottom-nav-wrap { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 80; width: calc(100% - 32px); max-width: 460px; padding: 0 8px; }
+  .bottom-nav { display: flex; align-items: center; justify-content: space-around; background: rgba(10, 5, 25, 0.95); border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 26px; padding: 8px 4px; box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15); position: relative; overflow: hidden; }
+  .nav-btn { flex: 1; background: transparent; border: none; color: #64748b; font-family: inherit; cursor: pointer; padding: 8px 2px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: color 0.2s, background 0.2s; position: relative; outline: none; min-width: 0; }
+  .nav-btn i { font-size: 17px; transition: transform 0.2s; }
+  .nav-btn .nav-logo-img { width: 21px; height: 21px; object-fit: contain; transition: transform 0.2s; }
+  .nav-btn span { font-size: 8.5px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; white-space: nowrap; }
+  .nav-btn:hover:not(.active) { color: #cbd5e1; background: rgba(0, 240, 255, 0.05); }
+  .nav-btn.active { color: #fff; background: linear-gradient(135deg, rgba(157, 0, 255, 0.25), rgba(255, 0, 229, 0.25), rgba(0, 240, 255, 0.25)); border: 1px solid var(--clr-a); }
+  .nav-btn.active i { text-shadow: 0 0 8px var(--clr-a); transform: scale(1.1); }
+  .nav-btn.active .nav-logo-img { transform: scale(1.1); }
+  .foot-wrap { position: relative; z-index: 2; text-align: center; padding: 0 16px 24px; font-family: 'Courier New', monospace; }
+  .copy-note { font-size: 11px; color: #94a3b8; letter-spacing: 0.5px; line-height: 1.9; }
+  .copy-note .brand-tag { color: var(--clr-a); font-weight: 700; letter-spacing: 1px; }
+  .copy-note a { color: var(--clr-b); text-decoration: none; font-weight: 700; }
+  .srv-info { margin-top: 8px; font-size: 10.5px; color: #64748b; letter-spacing: 0.8px; line-height: 2; display: flex; flex-direction: column; gap: 2px; align-items: center; }
+  .srv-info .row { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
+  .srv-info i { color: var(--clr-a); font-size: 10px; opacity: 0.85; }
+  .srv-info .lbl { color: #94a3b8; font-weight: 600; letter-spacing: 1px; }
+  .srv-info code { color: var(--clr-d); background: rgba(0, 255, 157, 0.08); padding: 2px 8px; border-radius: 5px; border: 1px solid rgba(0, 255, 157, 0.3); font-size: 10.5px; font-family: 'Courier New', monospace; }
+  .prof-sheet { position: fixed; inset: 0; z-index: 100; background: rgba(0, 0, 0, 0.8); display: none; align-items: center; justify-content: center; padding: 20px 16px; }
+  .prof-sheet.show { display: flex; }
+  .prof-inner { width: 100%; max-width: 420px; background: rgba(10, 5, 25, 0.98); border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 20px; padding: 26px 22px 22px; box-shadow: 0 0 40px rgba(0, 240, 255, 0.2); position: relative; overflow: hidden; max-height: 90vh; overflow-y: auto; font-family: 'Courier New', monospace; }
+  .prof-x { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 0, 229, 0.08); border: 1px solid rgba(255, 0, 229, 0.35); color: var(--clr-b); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; z-index: 2; }
+  .prof-x:hover { background: rgba(255, 0, 229, 0.2); }
+  .prof-pic-wrap { display: flex; justify-content: center; margin-bottom: 16px; }
+  .prof-pic { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--clr-a); box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); object-fit: cover; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 44px; background: linear-gradient(135deg, var(--clr-c), var(--clr-b)); }
+  .prof-display { text-align: center; font-size: 18px; font-weight: 800; letter-spacing: 1.5px; background: linear-gradient(90deg, var(--clr-a), var(--clr-b), var(--clr-c)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 4px; }
+  .prof-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; padding: 3px 10px; border-radius: 20px; letter-spacing: 1px; font-weight: 700; text-transform: uppercase; margin: 0 auto 16px; width: fit-content; }
+  .prof-badge.ok { color: var(--clr-d); background: rgba(0, 255, 157, 0.1); border: 1px solid rgba(0, 255, 157, 0.4); }
+  .prof-badge.no { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.4); }
+  .prof-head { text-align: center; margin-bottom: 16px; }
+  .prof-rows { display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px; }
+  .prof-row { display: flex; align-items: center; gap: 12px; padding: 11px 13px; background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.18); border-radius: 10px; }
+  .prof-row:hover { background: rgba(0, 240, 255, 0.08); border-color: rgba(0, 240, 255, 0.4); }
+  .prof-row .f-ico { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, rgba(157, 0, 255, 0.25), rgba(255, 0, 229, 0.25)); border: 1px solid rgba(0, 240, 255, 0.3); display: flex; align-items: center; justify-content: center; color: var(--clr-a); font-size: 13px; flex-shrink: 0; }
+  .prof-row .f-body { flex: 1; min-width: 0; text-align: left; }
+  .prof-row .f-label { font-size: 9.5px; color: #94a3b8; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
+  .prof-row .f-value { font-size: 12px; color: #e0f7ff; font-weight: 600; word-break: break-all; line-height: 1.4; }
+  .prof-row .copy-btn { background: transparent; border: 1px solid rgba(0, 240, 255, 0.3); color: var(--clr-a); width: 30px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .prof-row .copy-btn:hover { background: rgba(0, 240, 255, 0.12); }
+  .prof-row .copy-btn.copied { color: var(--clr-d); border-color: rgba(0, 255, 157, 0.5); background: rgba(0, 255, 157, 0.1); }
+  .prof-signout { width: 100%; padding: 13px; border: 1px solid rgba(255, 0, 229, 0.5); border-radius: 10px; background: transparent; color: var(--clr-b); font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .prof-signout:hover { background: rgba(255, 0, 229, 0.12); color: #fff; }
+  .ring { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.25); border-top-color: #fff; border-radius: 50%; animation: rotate 0.8s linear infinite; margin-right: 8px; vertical-align: -2px; }
+  @media (max-width: 520px) {
+    body { padding-bottom: 96px; }
+    .card-box, .tut-card, .tt-card, .tm-card, .api-card { padding: 24px 18px 20px; }
+    .brand-name, .tt-name, .tm-name { font-size: 19px; letter-spacing: 2px; }
+    .progress-bar { gap: 6px; }
+    .prog-node { padding: 6px 10px; font-size: 10px; }
+    .prog-node span.txt { display: none; }
+    .brand-logo { width: 80px; height: 80px; }
+    .top-avatar-wrap { top: 12px; right: 12px; }
+    .top-avatar { width: 46px; height: 46px; }
+    .top-avatar .avatar-inner { font-size: 18px; }
+    .prof-pic { width: 90px; height: 90px; font-size: 36px; }
+    .prof-display { font-size: 16px; }
+    .tut-card { padding: 20px 16px 18px; }
+    .tut-header .tut-title { font-size: 13px; letter-spacing: 1.5px; }
+    .tut-body .tut-name { font-size: 12px; }
+    .tut-body .tut-desc { font-size: 11px; }
+    .tt-src-tabs { grid-template-columns: repeat(2, 1fr); }
+    .tt-logo { width: 70px; height: 70px; }
+    .tt-logo i { font-size: 48px; }
+    .tm-logo { width: 70px; height: 70px; }
+    .tm-logo i { font-size: 44px; }
+    .bottom-nav-wrap { bottom: 14px; width: calc(100% - 20px); max-width: none; }
+    .bottom-nav { padding: 6px 3px; border-radius: 22px; }
+    .nav-btn { padding: 7px 2px; }
+    .nav-btn i { font-size: 15px; }
+    .nav-btn .nav-logo-img { width: 19px; height: 19px; }
+    .nav-btn span { font-size: 7.5px; letter-spacing: 0.3px; }
+    .tm-email-show .tm-email-txt { font-size: 11.5px; }
+    .tm-action-btn { font-size: 9px; padding: 8px 4px; }
+    .tm-auto-refresh { font-size: 9px; padding: 5px 8px; }
+    .api-card { padding: 20px 16px 18px; }
+    .api-title { font-size: 13px; }
+    .api-code { font-size: 10px; padding: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grd-bg"></div>
+
+<div class="top-avatar-wrap" id="avatarCorner" title="Profil">
+  <div class="top-avatar">
+    <div class="avatar-inner">
+      <img id="uPhoto" src="" alt="" style="display:none;"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div id="uLetter" style="display:none;">?</div>
+    </div>
+    <span class="online-dot"></span>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <div class="tab-page active" id="page-am">
+    <div class="card-box">
+      <div class="top-area">
+        <div class="brand-logo">
+          <img src="image/am.png" alt="AM Logo" onerror="this.replaceWith(Object.assign(document.createElement('i'),{className:'fa-solid fa-shield-halved',style:'font-size:60px;color:#fff;'}))">
+        </div>
+        <div class="brand-name">AM Premium</div>
+        <div class="brand-sub">Alight Motion Premium API</div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="prog-node active" id="nd1">
+          <i class="fa-solid fa-envelope"></i>
+          <span class="txt">Send</span>
+        </div>
+        <i class="fa-solid fa-chevron-right prog-arrow"></i>
+        <div class="prog-node" id="nd2">
+          <i class="fa-solid fa-unlock-keyhole"></i>
+          <span class="txt">Verify</span>
+        </div>
+      </div>
+
+      <div class="view-section active" id="sec-send">
+        <div class="lbl-row"><i class="fa-solid fa-at"></i> Email Address</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-envelope ico-left"></i>
+          <input type="email" id="emailAddr" placeholder="contoh@gmail.com" autocomplete="email">
+        </div>
+        <button class="act-btn act-btn-main" id="doSend">
+          <i class="fa-solid fa-paper-plane"></i> Send Magic Link
+        </button>
+        <div class="msg-box" id="msg-send"></div>
+      </div>
+
+      <div class="view-section" id="sec-verify">
+        <div class="lbl-row"><i class="fa-solid fa-at"></i> Email Address</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-envelope ico-left"></i>
+          <input type="email" id="emailCheck" placeholder="contoh@gmail.com" autocomplete="email">
+        </div>
+        <div class="lbl-row"><i class="fa-solid fa-link"></i> Magic Link</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-key ico-left"></i>
+          <textarea id="linkInput" placeholder="https://alight-creative.firebaseapp.com/__/auth/action?..."></textarea>
+        </div>
+        <button class="act-btn act-btn-main" id="doVerify">
+          <i class="fa-solid fa-unlock-keyhole"></i> Verify Premium
+        </button>
+        <button class="act-btn act-btn-back" id="goBack">
+          <i class="fa-solid fa-arrow-left"></i> Kembali
+        </button>
+        <div class="msg-box" id="msg-verify"></div>
+      </div>
+    </div>
+
+    <div class="tut-card">
+      <div class="tut-header">
+        <div class="tut-icon"><i class="fa-solid fa-book-open-reader"></i></div>
+        <div class="tut-title-box">
+          <div class="tut-title">Cara Penggunaan</div>
+          <div class="tut-sub">// Tutorial Step-by-Step</div>
+        </div>
+      </div>
+      <div class="tut-step">
+        <div class="tut-num">1</div>
+        <div class="tut-body">
+          <div class="tut-name"><i class="fa-solid fa-envelope"></i> Masukkan Email</div>
+          <div class="tut-desc">Ketik email <b>Alight Motion</b> di kolom <code>Email Address</code>, klik <b>Send Magic Link</b>.</div>
+        </div>
+      </div>
+      <div class="tut-step">
+        <div class="tut-num">2</div>
+        <div class="tut-body">
+          <div class="tut-name"><i class="fa-solid fa-inbox"></i> Cek Inbox / Spam</div>
+          <div class="tut-desc">Buka Gmail, cek folder <b>Spam</b>. Cari email dari <code>noreplay</code>.</div>
+        </div>
+      </div>
+      <div class="tut-step">
+        <div class="tut-num">3</div>
+        <div class="tut-body">
+          <div class="tut-name"><i class="fa-solid fa-hand-pointer"></i> Klik Tombol Login</div>
+          <div class="tut-desc">Tekan lama <b>Sign in to Alight Creative</b>, pilih <b>Copy URL</b>.</div>
+        </div>
+      </div>
+      <div class="tut-step">
+        <div class="tut-num">4</div>
+        <div class="tut-body">
+          <div class="tut-name"><i class="fa-solid fa-paste"></i> Paste Magic Link</div>
+          <div class="tut-desc">Tempel link di kolom <code>Magic Link</code>, klik <b>Verify Premium</b>.</div>
+        </div>
+      </div>
+      <div class="tut-step">
+        <div class="tut-num">5</div>
+        <div class="tut-body">
+          <div class="tut-name"><i class="fa-solid fa-crown"></i> Premium Aktif!</div>
+          <div class="tut-desc">Buka <b>Alight Motion</b> login pakai Google yang sama. Premium aktif <b>1 Tahun</b>. 🎉</div>
+        </div>
+      </div>
+      <div class="tut-note">
+        <i class="fa-solid fa-circle-info"></i>
+        <div>Link magic cuma berlaku <b>sekali pakai</b>. Kalau gagal, coba kirim ulang dari step 1.</div>
+      </div>
+      <div class="tut-warn">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <div>Jangan bagikan <b>magic link</b> ke orang lain!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-page" id="page-downloader">
+
+    <div class="dl-tabs">
+      <button class="dl-tab active" data-dltab="tiktok" type="button">
+        <i class="fa-brands fa-tiktok"></i> TikTok
+      </button>
+      <button class="dl-tab" data-dltab="youtube" type="button">
+        <i class="fa-brands fa-youtube"></i> YouTube DL
+      </button>
+      <button class="dl-tab" data-dltab="spotify" type="button">
+        <i class="fa-brands fa-spotify"></i> Spotify
+      </button>
+      <button class="dl-tab" data-dltab="soundcloud" type="button">
+        <i class="fa-brands fa-soundcloud"></i> SoundCloud
+      </button>
+    </div>
+
+    <div class="dl-panel active" id="dl-panel-tiktok">
+    <div class="tt-card">
+      <div class="tt-header">
+        <div class="tt-logo"><i class="fa-brands fa-tiktok"></i></div>
+        <div class="tt-name">TikTok Downloader</div>
+        <div class="tt-sub">No Watermark • Slide & Video</div>
+      </div>
+      <div class="lbl-row"><i class="fa-solid fa-link"></i> TikTok URL</div>
+      <div class="inp-box">
+        <i class="fa-solid fa-globe ico-left"></i>
+        <input type="text" id="ttUrl" placeholder="https://www.tiktok.com/@user/video/..." autocomplete="off">
+      </div>
+      <div class="tt-src-lbl">
+        <div class="lbl-row" style="margin:0;"><i class="fa-solid fa-server"></i> Pilih API</div>
+      </div>
+      <div class="tt-src-tabs" id="ttSrcTabs">
+        <button class="tt-src active" data-src="" type="button">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Auto <small>tikwm → snaptik</small>
+        </button>
+        <button class="tt-src" data-src="tikwm" type="button">
+          <i class="fa-solid fa-bolt"></i> TikWM <small>cepat, HD</small>
+        </button>
+        <button class="tt-src" data-src="snaptikapp" type="button">
+          <i class="fa-solid fa-camera"></i> SnapTik.app <small>HD asli</small>
+        </button>
+        <button class="tt-src" data-src="snaptikfi" type="button">
+          <i class="fa-solid fa-film"></i> SnapTik.fi <small>SD + audio</small>
+        </button>
+      </div>
+      <div class="tt-src-hint" id="ttSrcHint"><b>Auto</b> — coba TikWM dulu, kalau gagal otomatis pindah ke SnapTik.app lalu SnapTik.fi.</div>
+      <button class="act-btn act-btn-main" id="ttFetch">
+        <i class="fa-solid fa-cloud-arrow-down"></i> Download
+      </button>
+      <div class="msg-box" id="msg-tt"></div>
+      <div class="tt-result" id="ttResult"></div>
+    </div>
+    </div>
+
+    <div class="dl-panel" id="dl-panel-youtube">
+      <div class="yt-theme">
+        <div class="sp-card">
+          <div class="sp-header">
+            <div class="sp-logo"><i class="fa-brands fa-youtube"></i></div>
+            <div class="sp-name">YouTube DL</div>
+            <div class="sp-sub">Auto Detect • Video & Shorts</div>
+          </div>
+          <div class="lbl-row"><i class="fa-solid fa-link"></i> YouTube URL</div>
+          <div class="inp-box">
+            <i class="fa-brands fa-youtube ico-left"></i>
+            <input type="text" id="ytUrl" placeholder="https://youtube.com/watch?v=... atau /shorts/..." autocomplete="off">
+          </div>
+          <div class="yt-auto-hint" id="ytAutoHint">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            Tempel link YouTube. Jenis link akan dideteksi otomatis saat tombol Download ditekan.
+          </div>
+          <button class="act-btn act-btn-main" id="ytFetch">
+            <i class="fa-solid fa-cloud-arrow-down"></i> Download
+          </button>
+          <div class="msg-box" id="msg-yt"></div>
+          <div class="yt-result" id="ytResult"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dl-panel" id="dl-panel-spotify">
+      <div class="sp-card">
+        <div class="sp-header">
+          <div class="sp-logo"><i class="fa-brands fa-spotify"></i></div>
+          <div class="sp-name">Spotify Downloader</div>
+          <div class="sp-sub">Search • Track • Album • Playlist → MP3</div>
+        </div>
+        <div class="lbl-row"><i class="fa-solid fa-magnifying-glass"></i> Judul Lagu / URL Spotify</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-magnifying-glass ico-left"></i>
+          <input type="text" id="spQuery" placeholder="judul lagu atau https://open.spotify.com/..." autocomplete="off">
+        </div>
+        <button class="act-btn act-btn-main" id="spSearch">
+          <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+        <div class="msg-box" id="msg-sp"></div>
+        <div class="sp-result" id="spResult"></div>
+      </div>
+    </div>
+
+    <div class="dl-panel" id="dl-panel-soundcloud">
+      <div class="sc-theme">
+        <div class="sp-card">
+          <div class="sp-header">
+            <div class="sp-logo"><i class="fa-brands fa-soundcloud"></i></div>
+            <div class="sp-name">SoundCloud Downloader</div>
+            <div class="sp-sub">Search • Track • Playlist → MP3</div>
+          </div>
+          <div class="lbl-row"><i class="fa-solid fa-magnifying-glass"></i> Judul Lagu / URL SoundCloud</div>
+          <div class="inp-box">
+            <i class="fa-solid fa-magnifying-glass ico-left"></i>
+            <input type="text" id="scQuery" placeholder="judul lagu atau https://soundcloud.com/..." autocomplete="off">
+          </div>
+          <button class="act-btn act-btn-main" id="scSearch">
+            <i class="fa-solid fa-magnifying-glass"></i> Search
+          </button>
+          <div class="msg-box" id="msg-sc"></div>
+          <div class="sp-result" id="scResult"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-page" id="page-temp">
+    <div class="tm-card">
+      <div class="tm-header">
+        <div class="tm-logo"><i class="fa-solid fa-envelope-open-text"></i></div>
+        <div class="tm-name">Temp Mail</div>
+        <div class="tm-sub">Session tersimpan otomatis di device ini</div>
+      </div>
+
+      <div class="tm-email-show empty" id="tmEmailShow">
+        <div class="tm-icon-box"><i class="fa-solid fa-at"></i></div>
+        <div class="tm-email-txt" id="tmEmailTxt">Belum ada email</div>
+        <button class="tm-copy-btn" id="tmCopyBtn" title="Copy Email" disabled>
+          <i class="fa-solid fa-copy"></i>
+        </button>
+      </div>
+
+      <div class="tm-action-row">
+        <button class="tm-action-btn" id="tmUseAM" disabled>
+          <i class="fa-solid fa-bolt"></i> Pakai di AM
+        </button>
+        <button class="tm-action-btn danger" id="tmResetBtn">
+          <i class="fa-solid fa-trash"></i> Reset
+        </button>
+      </div>
+
+      <div class="tm-tabs">
+        <button class="tm-tab active" data-tmtab="random">
+          <i class="fa-solid fa-shuffle"></i> Random
+        </button>
+        <button class="tm-tab" data-tmtab="custom">
+          <i class="fa-solid fa-pen"></i> Custom
+        </button>
+      </div>
+
+      <div class="tm-panel active" id="tm-panel-random">
+        <button class="act-btn act-btn-main" id="tmGenRandom">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Email
+        </button>
+      </div>
+
+      <div class="tm-panel" id="tm-panel-custom">
+        <div class="lbl-row"><i class="fa-solid fa-user"></i> Nama (sebelum @)</div>
+        <div class="inp-box">
+          <i class="fa-solid fa-user ico-left"></i>
+          <input type="text" id="tmName" placeholder="nama_kamu" autocomplete="off">
+        </div>
+        <div class="lbl-row"><i class="fa-solid fa-globe"></i> Domain</div>
+        <div class="tm-domain-grid" id="tmDomains"></div>
+        <button class="act-btn act-btn-main" id="tmGenCustom">
+          <i class="fa-solid fa-circle-check"></i> Buat Email Custom
+        </button>
+      </div>
+
+      <div class="tm-inbox-header">
+        <div class="tm-inbox-title">
+          <i class="fa-solid fa-inbox"></i> Inbox
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="tm-refresh-btn" id="tmRefreshBtn">
+            <i class="fa-solid fa-rotate"></i> Refresh
+          </button>
+          <label class="tm-auto-refresh" id="tmAutoWrap" title="Auto refresh tiap 1 menit">
+            <input type="checkbox" id="tmAutoRefresh">
+            <span class="tm-auto-box"><i class="fa-solid fa-check"></i></span>
+            Auto Refresh
+          </label>
+        </div>
+      </div>
+
+      <div class="tm-inbox" id="tmInbox">
+        <div class="tm-empty">
+          <i class="fa-solid fa-envelope"></i>
+          Belum ada pesan masuk.<br>
+          Generate email dulu, lalu pesan akan muncul otomatis.
+        </div>
+      </div>
+
+      <div class="msg-box" id="msg-tm"></div>
+    </div>
+  </div>
+
+  <div class="tab-page" id="page-api">
+    <div class="api-wrap">
+
+      <div class="tut-warn" style="margin:0;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <div>KALAU ADA KESALAHAN PENULISAN API, SILAHKAN LANGSUNG KE WEBSITE API TERSEBUT UNTUK MELIHAT CARA PENGGUNAAN API TERSEBUT!</div>
+      </div>
+
+      <div class="api-card api-am">
+        <div class="api-head">
+          <div class="api-ico">
+            <img src="image/am.png" alt="AM"
+              onerror="this.replaceWith(Object.assign(document.createElement('i'),{className:'fa-solid fa-crown'}))">
+          </div>
+          <div class="api-title-box">
+            <div class="api-title">AM Premium API</div>
+            <div class="api-sub">// restapidhan.vercel.app</div>
+          </div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Send Magic Link
+          </div>
+          <div class="api-url">/api/am?action=send&apikey={KEY}&email={EMAIL}</div>
+          <div class="api-desc">
+            Kirim magic link ke email target. Wajib pakai proxy Worker karena CORS.
+            Parameter: <b>action</b>, <b>apikey</b>, <b>email</b>.
+          </div>
+          <button class="api-code-toggle" data-target="code-am-send">
+            <i class="fa-solid fa-chevron-right"></i> Contoh
+          </button>
+          <pre class="api-code" id="code-am-send">const AM_PROXY = 'https://am-web.xyncteamofficial.workers.dev';
+const AM_API   = 'https://restapidhan.vercel.app';
+const AM_KEY   = 'freeapikeydhan26';
+
+const target = `${AM_API}/api/am` +
+  `?action=send` +
+  `&apikey=${encodeURIComponent(AM_KEY)}` +
+  `&email=${encodeURIComponent('contoh@gmail.com')}`;
+
+const url = `${AM_PROXY}/?target=${encodeURIComponent(target)}`;
+
+const res = await fetch(url, {
+  method: 'GET',
+  headers: { 'Accept': 'application/json' }
+});
+const data = await res.json();
+console.log(data);</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Verify Premium
+          </div>
+          <div class="api-url">/api/am?action=verif&apikey={KEY}&email={EMAIL}&url={MAGIC_LINK}</div>
+          <div class="api-desc">
+            Verifikasi magic link & aktifkan premium. Parameter <b>url</b> harus di-URL-encode.
+          </div>
+          <button class="api-code-toggle" data-target="code-am-verif">
+            <i class="fa-solid fa-chevron-right"></i> Contoh
+          </button>
+          <pre class="api-code" id="code-am-verif">const target = `${AM_API}/api/am` +
+  `?action=verif` +
+  `&apikey=${encodeURIComponent(AM_KEY)}` +
+  `&email=${encodeURIComponent('contoh@gmail.com')}` +
+  `&url=${encodeURIComponent('https://alight-creative.firebaseapp.com/__/auth/action?...')}`;
+
+const url = `${AM_PROXY}/?target=${encodeURIComponent(target)}`;
+const res = await fetch(url);
+const data = await res.json();
+console.log(data);</pre>
+        </div>
+      </div>
+
+      <div class="api-card api-tiktok">
+        <div class="api-head">
+          <div class="api-ico"><i class="fa-brands fa-tiktok"></i></div>
+          <div class="api-title-box">
+            <div class="api-title">TikTok API v2</div>
+            <div class="api-sub">// api-tiktokv2.vercel.app — via Worker proxy</div>
+          </div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Fetch Video / Slide
+          </div>
+          <div class="api-url">https://am-web.xyncteamofficial.workers.dev/?target={ENCODED}</div>
+          <div class="api-desc">
+            Semua request lewat Worker proxy. Target asli: <b>api-tiktokv2.vercel.app/api/v2/tiktok</b>.
+            Param <b>source</b> opsional: <b>tikwm</b> (default), <b>snaptikapp</b>, <b>snaptikfi</b>.
+            Response header <b>X-Source</b> = sumber yang dipakai, <b>X-HD</b> = <b>direct</b> / <b>fallback</b>.
+            Catatan: SnapTik.app gak ngasih data <b>likes</b> dan <b>audio</b>, jadi di web ini stat Likes disembunyiin kalau sumbernya snaptikapp.
+          </div>
+          <button class="api-code-toggle open" data-target="code-tiktok-v2">
+            <i class="fa-solid fa-chevron-right"></i> Contoh
+          </button>
+          <pre class="api-code show" id="code-tiktok-v2">const TT_WORKER = 'https://am-web.xyncteamofficial.workers.dev';
+const TT_API    = 'https://api-tiktokv2.vercel.app/api/v2/tiktok';
+
+const url = 'https://www.tiktok.com/@user/video/123456';
+
+const target = `${TT_API}?url=${encodeURIComponent(url)}`;
+const res = await fetch(`${TT_WORKER}/?target=${encodeURIComponent(target)}`);
+console.log(res.headers.get('X-Source'), await res.json());
+
+const hdTarget = `${TT_API}?source=snaptikapp&url=${encodeURIComponent(url)}`;
+const hd = await fetch(`${TT_WORKER}/?target=${encodeURIComponent(hdTarget)}`);
+console.log(hd.headers.get('X-HD'), await hd.json());
+
+const postTarget = TT_API;
+const post = await fetch(`${TT_WORKER}/?target=${encodeURIComponent(postTarget)}`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ url, source: 'snaptikfi' })
+});
+console.log(await post.json());</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Format Response
+          </div>
+          <div class="api-desc">
+            Sukses → <b>code: 0</b>. Gagal → <b>status: false</b> + object <b>errors</b> per source.
+          </div>
+          <button class="api-code-toggle" data-target="code-tiktok-v2-res">
+            <i class="fa-solid fa-chevron-right"></i> Contoh
+          </button>
+          <pre class="api-code" id="code-tiktok-v2-res">{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "id": "7687490640900394261",
+    "title": "...",
+    "cover": "https://...",
+    "duration": 22,
+    "play": "https://...",
+    "hdplay": "https://...",
+    "wmplay": "",
+    "music": "https://...",
+    "music_info": { "title": "...", "play": "https://..." },
+    "play_count": 96700,
+    "digg_count": 0,
+    "comment_count": 123,
+    "share_count": 763,
+    "author": { "unique_id": "kri_s18", "nickname": "...", "avatar": "https://..." },
+    "images": null
+  },
+  "copyright": "© XyncTeam 2026"
+}
+
+{
+  "status": false,
+  "message": "Semua sumber gagal",
+  "errors": {
+    "tikwm": "...",
+    "snaptikapp": "Video not found or unavailable",
+    "snaptikfi": "..."
+  },
+  "copyright": "© XyncTeam 2026"
+}</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Kode yang dipakai web ini
+          </div>
+          <div class="api-desc">
+            Semua request TikTok lewat Worker proxy. Gak ada request direct ke Vercel.
+          </div>
+          <button class="api-code-toggle" data-target="code-tiktok-web">
+            <i class="fa-solid fa-chevron-right"></i> Contoh
+          </button>
+          <pre class="api-code" id="code-tiktok-web">const TT_WORKER = 'https://am-web.xyncteamofficial.workers.dev';
+const TT_API    = 'https://api-tiktokv2.vercel.app/api/v2/tiktok';
+
+let ttSource = '';
+
+document.querySelectorAll('.tt-src').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tt-src').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ttSource = btn.dataset.src;
+  });
+});
+
+async function fetchTikTok(url) {
+  const qs = new URLSearchParams({ url });
+  if (ttSource) qs.set('source', ttSource);
+
+  const target = `${TT_API}?${qs}`;
+  const res = await fetch(`${TT_WORKER}/?target=${encodeURIComponent(target)}`, {
+    headers: { 'Accept': 'application/json' }
+  });
+
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const detail = json.errors
+      ? Object.entries(json.errors).map(([k, v]) => `${k}: ${v}`).join(' | ')
+      : '';
+    throw new Error(json.message || detail || `HTTP ${res.status}`);
+  }
+
+  json._source = res.headers.get('X-Source') || ttSource || 'tikwm';
+  json._hd = res.headers.get('X-HD') || '';
+  return json;
+}</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method post">POST</span> TikWM (raw)
+          </div>
+          <div class="api-url">https://tikwm.com/api/</div>
+          <div class="api-desc">
+            Sumber default yang dipakai API v2. Body: <b>url</b>, <b>hd=1</b>.
+          </div>
+          <button class="api-code-toggle" data-target="code-tikwm">
+            <i class="fa-solid fa-chevron-right"></i> Contoh
+          </button>
+          <pre class="api-code" id="code-tikwm">import axios from 'axios';
+import qs from 'qs';
+
+const data = qs.stringify({
+  url: 'https://www.tiktok.com/@user/video/123456',
+  hd: '1'
+});
+
+const response = await axios({
+  method: 'POST',
+  url: 'https://tikwm.com/api/',
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Cookie': 'current_language=en',
+    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36'
+  },
+  data: data,
+  timeout: 30000
+});
+
+console.log(response.data);</pre>
+        </div>
+      </div>
+
+      <div class="api-card api-spotify">
+        <div class="api-head">
+          <div class="api-ico"><i class="fa-brands fa-spotify"></i></div>
+          <div class="api-title-box">
+            <div class="api-title">Spotify API v2</div>
+            <div class="api-sub">// api-tiktokv2.vercel.app — via Worker proxy</div>
+          </div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Search / Track / Album / Playlist
+          </div>
+          <div class="api-url">https://am-web.xyncteamofficial.workers.dev/?target={ENCODED}</div>
+          <div class="api-desc">
+            Target asli: <b>api-tiktokv2.vercel.app/api/v2/spotify</b>.
+            Default return <b>metadata only</b>. Tambah param <b>track</b> buat link MP3:
+            <code>1</code> / <code>1,3</code> / <code>all</code>.
+          </div>
+          <button class="api-code-toggle" data-target="code-sp-meta">
+            <i class="fa-solid fa-chevron-right"></i> Contoh
+          </button>
+          <pre class="api-code" id="code-sp-meta">const SP_WORKER = 'https://am-web.xyncteamofficial.workers.dev';
+const SP_API    = 'https://api-tiktokv2.vercel.app/api/v2/spotify';
+
+const target = `${SP_API}?q=Snowfall`;
+const res = await fetch(`${SP_WORKER}/?target=${encodeURIComponent(target)}`);
+console.log(await res.json());
+
+const targetTrack = `${SP_API}?url=${encodeURIComponent('https://open.spotify.com/track/xxx')}`;
+const t = await fetch(`${SP_WORKER}/?target=${encodeURIComponent(targetTrack)}`);
+console.log(await t.json());</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Ambil Link Download MP3
+          </div>
+          <div class="api-url">.../api/v2/spotify?url={URL}&amp;track=1,2</div>
+          <div class="api-url">.../api/v2/spotify?q={KEYWORD}&amp;track=all&amp;limit=5</div>
+          <div class="api-desc">
+            <b>track</b> pilih nomor track. <b>track=all</b> buat semua (max 100, bisa dibatasi <b>limit</b>).<br>
+            Response kasih <b>download</b> (link langsung) &amp; <b>download_proxy</b> (streaming lewat domain API ini sendiri).
+          </div>
+          <button class="api-code-toggle" data-target="code-sp-dl">
+            <i class="fa-solid fa-chevron-right"></i> Contoh
+          </button>
+          <pre class="api-code" id="code-sp-dl">const target = `${SP_API}?url=${encodeURIComponent('https://open.spotify.com/album/xxx')}&track=1`;
+const dl = await fetch(`${SP_WORKER}/?target=${encodeURIComponent(target)}`);
+const data = await dl.json();
+console.log(data.tracks[0].download);
+console.log(data.tracks[0].download_proxy);
+
+const stream = data.tracks[0].download_proxy;
+const file = await fetch(stream);
+console.log(file.headers.get('Content-Disposition'), file.headers.get('Content-Type'));</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Parameter Lengkap
+          </div>
+          <div class="api-desc">
+            <b>url</b> — link Spotify (track / album / playlist)<br>
+            <b>q</b> — keyword search (alternatif url)<br>
+            <b>track</b> — <code>1</code> / <code>1,3</code> / <code>all</code><br>
+            <b>limit</b> — batasi jumlah track (angka)<br>
+            <b>meta</b> — <code>true</code> buat metadata only<br>
+            <b>dl</b> — streaming MP3 lewat domain API ini, isi sama <b>download</b> dari response (+ <b>name</b> buat nama file)<br>
+            <b>token</b> — session_token premium (optional)<br>
+            <b>license</b> — licenseKey adfree (optional)
+          </div>
+          <button class="api-code-toggle" data-target="code-sp-res">
+            <i class="fa-solid fa-chevron-right"></i> Contoh Response
+          </button>
+          <pre class="api-code" id="code-sp-res">{
+  "status": true,
+  "type": "search",
+  "query": "Snowfall",
+  "total": 20,
+  "total_selected": 20,
+  "tracks": [
+    {
+      "no": 1,
+      "title": "snowfall",
+      "artist": "Øneheart",
+      "album": "snowfall",
+      "duration": 124,
+      "duration_formatted": "2:04",
+      "cover": "https://cdn-images.dzcdn.net/...",
+      "videoId": null,
+      "url": "https://open.spotify.com/track/1596890022"
+    }
+  ],
+  "hint": "Tambahkan parameter track=<nomor> ...",
+  "copyright": "© XyncTeam 2026"
+}</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Kode yang dipakai web ini
+          </div>
+          <div class="api-desc">
+            Semua request Spotify lewat Worker proxy. Fallback terakhir ke spotsaver.net juga lewat Worker.
+          </div>
+          <button class="api-code-toggle" data-target="code-sp-web">
+            <i class="fa-solid fa-chevron-right"></i> Contoh
+          </button>
+          <pre class="api-code" id="code-sp-web">const SP_WORKER   = 'https://am-web.xyncteamofficial.workers.dev';
+const SP_API      = 'https://api-tiktokv2.vercel.app/api/v2/spotify';
+const SP_FALLBACK = 'https://spotsaver.net/api/spotify/';
+
+async function spFetchJson(params) {
+  const qs = new URLSearchParams(params).toString();
+  const urls = [
+    `${SP_WORKER}/?target=${encodeURIComponent(`${SP_API}?${qs}`)}`,
+    `${SP_WORKER}/?target=${encodeURIComponent(SP_FALLBACK + qs)}`
+  ];
+  let lastErr = new Error('Gagal konek ke API Spotify 😭');
+  for (const u of urls) {
+    try {
+      const res = await fetch(u, { headers: { 'Accept': 'application/json' } });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok && res.status !== 404) {
+        const err = new Error(json.message || `HTTP ${res.status}`);
+        err.fatal = res.status === 400 || res.status === 401 || res.status === 403;
+        throw err;
+      }
+      if (!res.ok) { lastErr = new Error(json.message || `HTTP ${res.status}`); continue; }
+      return json;
+    } catch (e) { lastErr = e; if (e.fatal) throw e; }
+  }
+  throw lastErr;
+}</pre>
+        </div>
+      </div>
+
+      <div class="api-card api-mail">
+        <div class="api-head">
+          <div class="api-ico"><i class="fa-solid fa-envelope-open-text"></i></div>
+          <div class="api-title-box">
+            <div class="api-title">mail.tm API</div>
+            <div class="api-sub">// api.mail.tm — via Worker proxy</div>
+          </div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> List Domains
+          </div>
+          <div class="api-url">https://api.mail.tm/domains</div>
+          <div class="api-desc">Dapet list domain aktif. Response pakai key <b>hydra:member</b>.</div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method post">POST</span> Create Account
+          </div>
+          <div class="api-url">https://api.mail.tm/accounts</div>
+          <div class="api-desc">Body: <code>{ address, password }</code>. Password minimal 8 karakter.</div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method post">POST</span> Get Token
+          </div>
+          <div class="api-url">https://api.mail.tm/token</div>
+          <div class="api-desc">Body: <code>{ address, password }</code>. Return <code>{ token, id }</code>.</div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Get Messages
+          </div>
+          <div class="api-url">https://api.mail.tm/messages</div>
+          <div class="api-desc">
+            Header: <code>Authorization: Bearer {token}</code>. Return list di key <b>hydra:member</b>.
+          </div>
+          <button class="api-code-toggle" data-target="code-mailtm-flow">
+            <i class="fa-solid fa-chevron-right"></i> Contoh Flow Lengkap
+          </button>
+          <pre class="api-code" id="code-mailtm-flow">const TM_WORKER = 'https://am-web.xyncteamofficial.workers.dev';
+const TM_API    = 'https://api.mail.tm';
+
+function tmProxy(target, extraHeaders) {
+  const h = extraHeaders || {};
+  const hb64 = btoa(unescape(encodeURIComponent(JSON.stringify(h))));
+  return `${TM_WORKER}/?target=${encodeURIComponent(target)}&hdrs=${encodeURIComponent(hb64)}`;
+}
+
+const dRes = await fetch(tmProxy(`${TM_API}/domains`));
+const dData = await dRes.json();
+const domain = dData['hydra:member'][0].domain;
+
+const address = `user${Date.now()}@${domain}`;
+const password = 'MyPass123!@';
+
+await fetch(tmProxy(`${TM_API}/accounts`), {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ address, password })
+});
+
+const tRes = await fetch(tmProxy(`${TM_API}/token`), {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ address, password })
+});
+const { token } = await tRes.json();
+
+const mRes = await fetch(tmProxy(`${TM_API}/messages`, {
+  'Authorization': `Bearer ${token}`
+}));
+const mData = await mRes.json();
+console.log(mData['hydra:member']);</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Read Message
+          </div>
+          <div class="api-url">https://api.mail.tm/messages/{id}</div>
+          <div class="api-desc">
+            Header: <code>Authorization: Bearer {token}</code>. Return body di <code>html[0]</code> atau <code>text</code>.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<div class="bottom-nav-wrap">
+  <div class="bottom-nav">
+    <button class="nav-btn active" data-tab="am">
+      <img class="nav-logo-img" src="image/am.png" alt="AM"
+        onerror="this.replaceWith(Object.assign(document.createElement('i'),{className:'fa-solid fa-shield-halved'}))">
+      <span>Am Prem</span>
+    </button>
+    <button class="nav-btn" data-tab="downloader">
+      <i class="fa-solid fa-download"></i>
+      <span>Downloader</span>
+    </button>
+    <button class="nav-btn" data-tab="temp">
+      <i class="fa-solid fa-envelope-open-text"></i>
+      <span>Temp Mail</span>
+    </button>
+    <button class="nav-btn" data-tab="api">
+      <i class="fa-solid fa-code"></i>
+      <span>API List</span>
+    </button>
+  </div>
+</div>
+
+<div class="foot-wrap">
+  <div class="copy-note">
+    © 2026 <span class="brand-tag">XyncTeam</span> — All Rights Reserved<br>
+  </div>
+</div>
+
+<div class="prof-sheet" id="profPanel">
+  <div class="prof-inner">
+    <button class="prof-x" id="panelClose"><i class="fa-solid fa-xmark"></i></button>
+    <div class="prof-pic-wrap">
+      <img class="prof-pic" id="profPhoto" src="" alt="" style="display:none;"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="prof-pic" id="profLetter" style="display:none;">?</div>
+    </div>
+    <div class="prof-head">
+      <div class="prof-display" id="profName">-</div>
+      <div class="prof-badge" id="profBadge"><i class="fa-solid fa-circle-check"></i> <span>Verified</span></div>
+    </div>
+    <div class="prof-rows">
+      <div class="prof-row">
+        <div class="f-ico"><i class="fa-solid fa-envelope"></i></div>
+        <div class="f-body"><div class="f-label">Email</div><div class="f-value" id="profMail">-</div></div>
+      </div>
+      <div class="prof-row">
+        <div class="f-ico"><i class="fa-solid fa-fingerprint"></i></div>
+        <div class="f-body"><div class="f-label">User ID</div><div class="f-value" id="profUid">-</div></div>
+        <button class="copy-btn" data-copy="profUid" title="Copy UID"><i class="fa-solid fa-copy"></i></button>
+      </div>
+      <div class="prof-row">
+        <div class="f-ico"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="f-body"><div class="f-label">Provider</div><div class="f-value" id="profProv">-</div></div>
+      </div>
+      <div class="prof-row">
+        <div class="f-ico"><i class="fa-solid fa-calendar-plus"></i></div>
+        <div class="f-body"><div class="f-label">Dibuat</div><div class="f-value" id="profCreated">-</div></div>
+      </div>
+      <div class="prof-row">
+        <div class="f-ico"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <div class="f-body"><div class="f-label">Login Terakhir</div><div class="f-value" id="profLastIn">-</div></div>
+      </div>
+    </div>
+    <button class="prof-signout" id="btnSignout"><i class="fa-solid fa-right-from-bracket"></i> Logout Akun</button>
+  </div>
+</div>
+
+<script src="js/mainDsb.js"></script>
+
+</body>
+</html>
