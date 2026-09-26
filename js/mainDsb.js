@@ -828,11 +828,22 @@ function ytClear() {
   ytResult.innerHTML = '';
 }
 
+function ytDefaultLabel() {
+  const v = ytUrl.value.trim();
+  if (v && ytLooksLikeShorts(v)) {
+    return '<i class="fa-solid fa-bolt"></i> Download Shorts YT';
+  }
+  if (v && ytExtractId(v)) {
+    return '<i class="fa-solid fa-cloud-arrow-down"></i> Download Video YT';
+  }
+  return '<i class="fa-solid fa-cloud-arrow-down"></i> Download';
+}
+
 function ytBusy(on) {
   ytFetch.disabled = on;
   ytFetch.innerHTML = on
     ? '<span class="ring"></span> Auto Detecting...'
-    : '<i class="fa-solid fa-cloud-arrow-down"></i> Download';
+    : ytDefaultLabel();
 }
 
 function ytSanitize(name) {
@@ -918,9 +929,12 @@ function ytRender(response) {
 
 async function ytRequest(input, forcedType = '') {
   const params = new URLSearchParams({ url: input });
-  if (forcedType) params.set('type', forcedType);
 
-  const res = await fetch(`${YT_DL_API}?${params}`, {
+  const detectedType = forcedType || (ytLooksLikeShorts(input) ? 'shorts' : '');
+  if (detectedType === 'shorts') params.set('type', 'shorts');
+
+  const finalUrl = `${YT_DL_API}?${params.toString()}`;
+  const res = await fetch(finalUrl, {
     method: 'GET',
     headers: { 'Accept': 'application/json' },
     cache: 'no-store'
@@ -1067,26 +1081,14 @@ async function handleYouTubeDownload() {
 
   const inputWasShorts = ytLooksLikeShorts(input);
   ytBusy(true);
-  ytMsg('pend', '<span class="ring"></span> Mendeteksi link dan mengambil format download...');
+  ytMsg('pend', `<span class="ring"></span> ${inputWasShorts ? 'Mengambil format Shorts' : 'Mengambil format video'}...`);
 
   try {
-    let data;
-    try {
-      data = await ytRequest(input);
-    } catch (firstError) {
-      if (!inputWasShorts) throw firstError;
-      ytMsg('pend', '<span class="ring"></span> Provider Shorts sibuk, mencoba jalur alternatif...');
-      data = await ytRequest(input, 'video');
-      data._fallback = true;
-    }
-
+    const data = await ytRequest(input);
     data._inputWasShorts = inputWasShorts;
     ytRender(data);
-    const detected = inputWasShorts || data.type === 'shorts'
-      ? 'YouTube Shorts'
-      : 'YouTube Video';
-    const via = data._fallback ? ' melalui jalur alternatif' : '';
-    ytMsg('ok', `<i class="fa-solid fa-circle-check"></i> <b>${ytEsc(detected)}</b> terdeteksi${via}. Pilih format untuk mulai download.`);
+    const detected = inputWasShorts || data.type === 'shorts' ? 'YouTube Shorts' : 'YouTube Video';
+    ytMsg('ok', `<i class="fa-solid fa-circle-check"></i> <b>${ytEsc(detected)}</b> terdeteksi. Pilih format untuk mulai download.`);
   } catch (error) {
     ytMsg('fail', `<i class="fa-solid fa-circle-xmark"></i> ${ytEsc(error.message || 'Gagal mengambil data YouTube.')}`);
   } finally {
@@ -1102,7 +1104,10 @@ ytUrl.addEventListener('input', () => {
   const value = ytUrl.value.trim();
   const label = ytLooksLikeShorts(value) ? 'Shorts terdeteksi dari URL' : 'Video/ID akan dideteksi oleh API';
   ytHint.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> ${ytEsc(label)} saat tombol Download ditekan.`;
+  if (!ytFetch.disabled) ytFetch.innerHTML = ytDefaultLabel();
 });
+
+ytFetch.innerHTML = ytDefaultLabel();
 
 const spQuery  = document.getElementById('spQuery');
 const spBtn    = document.getElementById('spSearch');
