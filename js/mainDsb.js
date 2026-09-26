@@ -9,7 +9,7 @@ const AM_KEY   = 'freeapikeydhan26';
 const TT_WORKER = 'https://am-web.xyncteamofficial.workers.dev';
 const TT_API    = 'https://api-tiktokv2.vercel.app/api/v2/tiktok';
 
-const YT_DL_API = 'https://api-ytdlv1.soundcloudxync.workers.dev';
+const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
 
 const SP_WORKER   = 'https://am-web.xyncteamofficial.workers.dev';
 const SP_API      = 'https://api-tiktokv2.vercel.app/api/v2/spotify';
