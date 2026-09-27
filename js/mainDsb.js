@@ -200,38 +200,38 @@ function renderUser(user) {
     if (e.key === 'Escape' && modal.classList.contains('show')) hideProf();
   });
 
-  document.querySelectorAll('.copy-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const txt = document.getElementById(btn.dataset.copy).textContent;
-      try {
-        await navigator.clipboard.writeText(txt);
-        const ico = btn.querySelector('i');
-        ico.className = 'fa-solid fa-check';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          ico.className = 'fa-solid fa-copy';
-          btn.classList.remove('copied');
-        }, 1500);
-      } catch {}
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const txt = document.getElementById(btn.dataset.copy).textContent;
+        try {
+          await navigator.clipboard.writeText(txt);
+          const ico = btn.querySelector('i');
+          ico.className = 'fa-solid fa-check';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            ico.className = 'fa-solid fa-copy';
+            btn.classList.remove('copied');
+          }, 1500);
+        } catch {}
+      });
     });
-  });
 
-  async function signout(btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
-    try {
-      sessionStorage.removeItem('xync_sess');
-      clearSession();
-      await api('logout').catch(() => {});
-      window.location.replace('index.html');
-    } catch (e) {
-      btn.disabled = false;
+    async function signout(btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
+      try {
+        sessionStorage.removeItem('xync_sess');
+        clearSession();
+        await api('logout').catch(() => {});
+        window.location.replace('index.html');
+      } catch (e) {
+        btn.disabled = false;
+      }
     }
-  }
 
-  document.getElementById('btnSignout').addEventListener('click', function () {
-    signout(this);
-  });
+    document.getElementById('btnSignout').addEventListener('click', function () {
+      signout(this);
+    });
 }
 
 async function boot() {
@@ -352,32 +352,32 @@ document.getElementById('doSend').addEventListener('click', async () => {
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return flash('msg-send', 'fail',
-      '<i class="fa-solid fa-triangle-exclamation"></i> Masukkan email yang valid!');
+                 '<i class="fa-solid fa-triangle-exclamation"></i> Masukkan email yang valid!');
   }
 
   busy(btn, true);
   flash('msg-send', 'pend',
-    '<span class="ring"></span> Mengirim magic link ke <b>' + safe(email) + '</b>...');
+        '<span class="ring"></span> Mengirim magic link ke <b>' + safe(email) + '</b>...');
 
   try {
     const { ok, status, data } = await amSendLink(email);
 
     const isSuccess =
-      ok && (
-        data.status === true ||
-        data.status === 'success' ||
-        data.status === 'ok' ||
-        data.success === true ||
-        data.message?.toLowerCase().includes('berhasil') ||
-        data.message?.toLowerCase().includes('success') ||
-        data.message?.toLowerCase().includes('sent')
-      );
+    ok && (
+      data.status === true ||
+      data.status === 'success' ||
+      data.status === 'ok' ||
+      data.success === true ||
+      data.message?.toLowerCase().includes('berhasil') ||
+      data.message?.toLowerCase().includes('success') ||
+      data.message?.toLowerCase().includes('sent')
+    );
 
     if (isSuccess) {
       flash('msg-send', 'ok',
-        `<i class="fa-solid fa-circle-check"></i> <b>Magic link terkirim!</b><br>
-         Cek inbox / spam: <b>${safe(email)}</b><br>
-         <small>Mengalihkan ke halaman verifikasi...</small>`);
+            `<i class="fa-solid fa-circle-check"></i> <b>Magic link terkirim!</b><br>
+            Cek inbox / spam: <b>${safe(email)}</b><br>
+            <small>Mengalihkan ke halaman verifikasi...</small>`);
       setTimeout(() => {
         clear('msg-send');
         openVerify(email);
@@ -385,12 +385,12 @@ document.getElementById('doSend').addEventListener('click', async () => {
     } else {
       const err = data.error || data.message || ('HTTP ' + status);
       flash('msg-send', 'fail',
-        `<i class="fa-solid fa-circle-xmark"></i> <b>Gagal mengirim</b><br>${safe(err)}
-         <pre>${safe(JSON.stringify(data, null, 2))}</pre>`);
+            `<i class="fa-solid fa-circle-xmark"></i> <b>Gagal mengirim</b><br>${safe(err)}
+            <pre>${safe(JSON.stringify(data, null, 2))}</pre>`);
     }
   } catch (e) {
     flash('msg-send', 'fail',
-      `<i class="fa-solid fa-circle-xmark"></i> Network error: ${safe(e.message)}`);
+          `<i class="fa-solid fa-circle-xmark"></i> Network error: ${safe(e.message)}`);
   } finally {
     busy(btn, false, '<i class="fa-solid fa-paper-plane"></i> Send Magic Link');
   }
@@ -404,47 +404,47 @@ document.getElementById('doVerify').addEventListener('click', async () => {
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return flash('msg-verify', 'fail',
-      '<i class="fa-solid fa-triangle-exclamation"></i> Email tidak valid!');
+                 '<i class="fa-solid fa-triangle-exclamation"></i> Email tidak valid!');
   }
   if (!/^https?:\/\//.test(link)) {
     return flash('msg-verify', 'fail',
-      '<i class="fa-solid fa-triangle-exclamation"></i> Magic link harus dimulai dengan http:// atau https://');
+                 '<i class="fa-solid fa-triangle-exclamation"></i> Magic link harus dimulai dengan http:// atau https://');
   }
 
   busy(btn, true);
   flash('msg-verify', 'pend',
-    '<span class="ring"></span> Memverifikasi premium...');
+        '<span class="ring"></span> Memverifikasi premium...');
 
   try {
     const { ok, status, data } = await amVerify(email, link);
 
     const isSuccess =
-      ok && (
-        data.status === true ||
-        data.status === 'success' ||
-        data.status === 'ok' ||
-        data.success === true ||
-        data.message?.toLowerCase().includes('berhasil') ||
-        data.message?.toLowerCase().includes('success') ||
-        data.message?.toLowerCase().includes('activated') ||
-        data.message?.toLowerCase().includes('verified')
-      );
+    ok && (
+      data.status === true ||
+      data.status === 'success' ||
+      data.status === 'ok' ||
+      data.success === true ||
+      data.message?.toLowerCase().includes('berhasil') ||
+      data.message?.toLowerCase().includes('success') ||
+      data.message?.toLowerCase().includes('activated') ||
+      data.message?.toLowerCase().includes('verified')
+    );
 
     if (isSuccess) {
       flash('msg-verify', 'ok',
-        `<i class="fa-solid fa-crown"></i> <b>PREMIUM BERHASIL!</b><br><br>
-         📧 <b>${safe(email)}</b><br>
-         Silakan buka Alight Motion & login pakai akun Google ini.
-         <pre>${safe(JSON.stringify(data, null, 2))}</pre>`);
+            `<i class="fa-solid fa-crown"></i> <b>PREMIUM BERHASIL!</b><br><br>
+            📧 <b>${safe(email)}</b><br>
+            Silakan buka Alight Motion & login pakai akun Google ini.
+            <pre>${safe(JSON.stringify(data, null, 2))}</pre>`);
     } else {
       const err = data.error || data.message || ('HTTP ' + status);
       flash('msg-verify', 'fail',
-        `<i class="fa-solid fa-circle-xmark"></i> <b>Verifikasi gagal</b><br>${safe(err)}
-         <pre>${safe(JSON.stringify(data, null, 2))}</pre>`);
+            `<i class="fa-solid fa-circle-xmark"></i> <b>Verifikasi gagal</b><br>${safe(err)}
+            <pre>${safe(JSON.stringify(data, null, 2))}</pre>`);
     }
   } catch (e) {
     flash('msg-verify', 'fail',
-      `<i class="fa-solid fa-circle-xmark"></i> Network error: ${safe(e.message)}`);
+          `<i class="fa-solid fa-circle-xmark"></i> Network error: ${safe(e.message)}`);
   } finally {
     busy(btn, false, '<i class="fa-solid fa-unlock-keyhole"></i> Verify Premium');
   }
@@ -504,8 +504,8 @@ function ttClear() {
 function ttBusy(on) {
   ttFetch.disabled = on;
   ttFetch.innerHTML = on
-    ? '<span class="ring"></span> Processing...'
-    : '<i class="fa-solid fa-cloud-arrow-down"></i> Download';
+  ? '<span class="ring"></span> Processing...'
+  : '<i class="fa-solid fa-cloud-arrow-down"></i> Download';
 }
 function fmtNum(n) {
   if (n === null || n === undefined || n === '') return '–';
@@ -535,8 +535,8 @@ async function fetchTikTok(url) {
 
   if (!res.ok) {
     const detail = json.errors
-      ? Object.entries(json.errors).map(([k, v]) => `${k}: ${v}`).join('<br>')
-      : '';
+    ? Object.entries(json.errors).map(([k, v]) => `${k}: ${v}`).join('<br>')
+    : '';
     const e = new Error(json.message || `HTTP ${res.status}`);
     e.detail = detail;
     throw e;
@@ -553,11 +553,11 @@ async function handleTT() {
 
   if (!url) {
     return ttMsg('fail',
-      '<i class="fa-solid fa-triangle-exclamation"></i> Masukkan URL TikTok!');
+                 '<i class="fa-solid fa-triangle-exclamation"></i> Masukkan URL TikTok!');
   }
   if (!/(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/i.test(url)) {
     return ttMsg('fail',
-      '<i class="fa-solid fa-triangle-exclamation"></i> URL TikTok tidak valid!');
+                 '<i class="fa-solid fa-triangle-exclamation"></i> URL TikTok tidak valid!');
   }
 
   ttBusy(true);
@@ -569,18 +569,18 @@ async function handleTT() {
     if (!data || data.code !== 0 || !data.data) {
       const err = (data && data.msg) || 'Gagal mengambil data';
       ttMsg('fail',
-        `<i class="fa-solid fa-circle-xmark"></i> <b>Gagal</b><br>${ttEsc(err)}
-         <pre>${ttEsc(JSON.stringify(data, null, 2))}</pre>`);
+            `<i class="fa-solid fa-circle-xmark"></i> <b>Gagal</b><br>${ttEsc(err)}
+            <pre>${ttEsc(JSON.stringify(data, null, 2))}</pre>`);
       return;
     }
 
     renderTT(data.data, data._source, data._hd);
     ttMsg('ok',
-      `<i class="fa-solid fa-circle-check"></i> <b>Berhasil!</b> Data diambil via <b>${ttEsc(data._source)}</b>.`);
+          `<i class="fa-solid fa-circle-check"></i> <b>Berhasil!</b> Data diambil via <b>${ttEsc(data._source)}</b>.`);
 
   } catch (e) {
     ttMsg('fail',
-      `<i class="fa-solid fa-circle-xmark"></i> ${ttEsc(e.message)}${e.detail ? `<pre>${e.detail}</pre>` : ''}`);
+          `<i class="fa-solid fa-circle-xmark"></i> ${ttEsc(e.message)}${e.detail ? `<pre>${e.detail}</pre>` : ''}`);
   } finally {
     ttBusy(false);
   }
@@ -597,141 +597,141 @@ function renderTT(d, source, hdFlag) {
   let html = '';
 
   html += `<div class="tt-badges">
-    <span class="tt-badge src"><i class="fa-solid fa-server"></i> ${ttEsc(source || 'tikwm')}</span>
-    ${isSlide
-      ? `<span class="tt-badge"><i class="fa-solid fa-images"></i> Slide</span>`
-      : (hasHd || hdFlag === 'direct')
-        ? `<span class="tt-badge hd"><i class="fa-solid fa-circle-check"></i> HD tersedia</span>`
-        : `<span class="tt-badge sd"><i class="fa-solid fa-circle-info"></i> SD only</span>`}
+  <span class="tt-badge src"><i class="fa-solid fa-server"></i> ${ttEsc(source || 'tikwm')}</span>
+  ${isSlide
+    ? `<span class="tt-badge"><i class="fa-solid fa-images"></i> Slide</span>`
+    : (hasHd || hdFlag === 'direct')
+    ? `<span class="tt-badge hd"><i class="fa-solid fa-circle-check"></i> HD tersedia</span>`
+    : `<span class="tt-badge sd"><i class="fa-solid fa-circle-info"></i> SD only</span>`}
     ${d.duration ? `<span class="tt-badge"><i class="fa-solid fa-clock"></i> ${ttEsc(d.duration)}s</span>` : ''}
-  </div>`;
-
-  html += `
-    <div class="tt-info-card">
-      <div class="tt-author">
-        ${author.avatar
-          ? `<img class="tt-author-avatar" src="${ttEsc(author.avatar)}" alt=""
-               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-             <div class="tt-author-avatar" style="display:none;">${ttEsc((author.nickname || '?').charAt(0).toUpperCase())}</div>`
-          : `<div class="tt-author-avatar">${ttEsc((author.nickname || '?').charAt(0).toUpperCase())}</div>`
-        }
-        <div class="tt-author-info">
-          <div class="tt-author-name">${ttEsc(author.nickname || 'Unknown')}</div>
-          <div class="tt-author-handle">@${ttEsc(author.unique_id || 'unknown')}</div>
-        </div>
-      </div>
-      <div class="tt-stats">
-        <div class="tt-stat"><i class="fa-solid fa-play"></i><span class="num">${fmtNum(d.play_count)}</span><span class="lbl">Views</span></div>
-        ${isSnapApp ? '' : `<div class="tt-stat"><i class="fa-solid fa-heart"></i><span class="num">${fmtNum(d.digg_count)}</span><span class="lbl">Likes</span></div>`}
-        <div class="tt-stat"><i class="fa-solid fa-comment"></i><span class="num">${fmtNum(d.comment_count)}</span><span class="lbl">Comments</span></div>
-        <div class="tt-stat"><i class="fa-solid fa-share"></i><span class="num">${fmtNum(d.share_count)}</span><span class="lbl">Shares</span></div>
-      </div>
-    </div>
-  `;
-
-  if (d.title) {
-    html += `<div class="tt-title">${ttEsc(d.title)}</div>`;
-  }
-
-  if (isSlide) {
-    html += `<div class="tt-slides">`;
-    d.images.forEach((imgUrl, i) => {
-      html += `
-        <div class="tt-slide-item">
-          <img src="${ttEsc(imgUrl)}" alt="slide ${i+1}" loading="lazy">
-          <span class="slide-num">${i+1}</span>
-          <a class="slide-dl" href="${ttEsc(imgUrl)}" download="slide_${i+1}.jpg"
-             target="_blank" rel="noopener" title="Download">
-            <i class="fa-solid fa-download"></i>
-          </a>
-        </div>
-      `;
-    });
-    html += `</div>`;
+    </div>`;
 
     html += `
-      <div class="tt-dl-group">
-        <button class="tt-dl-btn tt-dl-btn-primary" id="ttDownloadAll">
-          <i class="fa-solid fa-images"></i> Download Semua Slide (${d.images.length})
-        </button>
-      </div>
+    <div class="tt-info-card">
+    <div class="tt-author">
+    ${author.avatar
+      ? `<img class="tt-author-avatar" src="${ttEsc(author.avatar)}" alt=""
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="tt-author-avatar" style="display:none;">${ttEsc((author.nickname || '?').charAt(0).toUpperCase())}</div>`
+      : `<div class="tt-author-avatar">${ttEsc((author.nickname || '?').charAt(0).toUpperCase())}</div>`
+    }
+    <div class="tt-author-info">
+    <div class="tt-author-name">${ttEsc(author.nickname || 'Unknown')}</div>
+    <div class="tt-author-handle">@${ttEsc(author.unique_id || 'unknown')}</div>
+    </div>
+    </div>
+    <div class="tt-stats">
+    <div class="tt-stat"><i class="fa-solid fa-play"></i><span class="num">${fmtNum(d.play_count)}</span><span class="lbl">Views</span></div>
+    ${isSnapApp ? '' : `<div class="tt-stat"><i class="fa-solid fa-heart"></i><span class="num">${fmtNum(d.digg_count)}</span><span class="lbl">Likes</span></div>`}
+    <div class="tt-stat"><i class="fa-solid fa-comment"></i><span class="num">${fmtNum(d.comment_count)}</span><span class="lbl">Comments</span></div>
+    <div class="tt-stat"><i class="fa-solid fa-share"></i><span class="num">${fmtNum(d.share_count)}</span><span class="lbl">Shares</span></div>
+    </div>
+    </div>
     `;
 
-  } else if (d.play || d.hdplay) {
-    const videoUrl = d.hdplay || d.play;
-    html += `
+    if (d.title) {
+      html += `<div class="tt-title">${ttEsc(d.title)}</div>`;
+    }
+
+    if (isSlide) {
+      html += `<div class="tt-slides">`;
+      d.images.forEach((imgUrl, i) => {
+        html += `
+        <div class="tt-slide-item">
+        <img src="${ttEsc(imgUrl)}" alt="slide ${i+1}" loading="lazy">
+        <span class="slide-num">${i+1}</span>
+        <a class="slide-dl" href="${ttEsc(imgUrl)}" download="slide_${i+1}.jpg"
+        target="_blank" rel="noopener" title="Download">
+        <i class="fa-solid fa-download"></i>
+        </a>
+        </div>
+        `;
+      });
+      html += `</div>`;
+
+      html += `
+      <div class="tt-dl-group">
+      <button class="tt-dl-btn tt-dl-btn-primary" id="ttDownloadAll">
+      <i class="fa-solid fa-images"></i> Download Semua Slide (${d.images.length})
+      </button>
+      </div>
+      `;
+
+    } else if (d.play || d.hdplay) {
+      const videoUrl = d.hdplay || d.play;
+      html += `
       <div class="tt-cover-wrap">
-        <video controls playsinline preload="metadata" poster="${ttEsc(d.cover || d.origin_cover || '')}">
-          <source src="${ttEsc(videoUrl)}" type="video/mp4">
-        </video>
+      <video controls playsinline preload="metadata" poster="${ttEsc(d.cover || d.origin_cover || '')}">
+      <source src="${ttEsc(videoUrl)}" type="video/mp4">
+      </video>
       </div>
       <div class="tt-dl-group">
-        <a class="tt-dl-btn tt-dl-btn-primary" href="${ttEsc(videoUrl)}"
-           download="tiktok${hasHd ? '_hd' : ''}.mp4" target="_blank" rel="noopener">
-          <i class="fa-solid fa-download"></i> ${hasHd ? 'Download Video HD (No WM)' : 'Download Video (No WM)'}
+      <a class="tt-dl-btn tt-dl-btn-primary" href="${ttEsc(videoUrl)}"
+      download="tiktok${hasHd ? '_hd' : ''}.mp4" target="_blank" rel="noopener">
+      <i class="fa-solid fa-download"></i> ${hasHd ? 'Download Video HD (No WM)' : 'Download Video (No WM)'}
+      </a>
+      ${hasHd ? `
+        <a class="tt-dl-btn tt-dl-btn-secondary" href="${ttEsc(d.play)}"
+        download="tiktok_sd.mp4" target="_blank" rel="noopener">
+        <i class="fa-solid fa-compress"></i> Download Video SD (No WM)
         </a>
-        ${hasHd ? `
-          <a class="tt-dl-btn tt-dl-btn-secondary" href="${ttEsc(d.play)}"
-             download="tiktok_sd.mp4" target="_blank" rel="noopener">
-            <i class="fa-solid fa-compress"></i> Download Video SD (No WM)
-          </a>
         ` : ''}
         ${d.wmplay ? `
           <a class="tt-dl-btn tt-dl-btn-secondary" href="${ttEsc(d.wmplay)}"
-             download="tiktok_wm.mp4" target="_blank" rel="noopener">
-            <i class="fa-solid fa-droplet"></i> Download dengan Watermark
+          download="tiktok_wm.mp4" target="_blank" rel="noopener">
+          <i class="fa-solid fa-droplet"></i> Download dengan Watermark
           </a>
-        ` : ''}
-      </div>
-    `;
-  } else {
-    html += `<div class="tt-title" style="border-left-color:#ef4444;color:#fca5a5;">
+          ` : ''}
+          </div>
+          `;
+    } else {
+      html += `<div class="tt-title" style="border-left-color:#ef4444;color:#fca5a5;">
       ⚠️ Tidak ada media yang bisa di-download dari URL ini.
-    </div>`;
-  }
+      </div>`;
+    }
 
-  if (music.play) {
-    html += `
+    if (music.play) {
+      html += `
       <div class="tt-dl-group" style="margin-top:10px;">
-        <a class="tt-dl-btn tt-dl-btn-secondary" href="${ttEsc(music.play)}"
-           download="music.mp3" target="_blank" rel="noopener">
-          <i class="fa-solid fa-music"></i> Download Audio
-        </a>
+      <a class="tt-dl-btn tt-dl-btn-secondary" href="${ttEsc(music.play)}"
+      download="music.mp3" target="_blank" rel="noopener">
+      <i class="fa-solid fa-music"></i> Download Audio
+      </a>
       </div>
-    `;
-  }
+      `;
+    }
 
-  ttResult.innerHTML = html;
-  ttResult.classList.add('show');
+    ttResult.innerHTML = html;
+    ttResult.classList.add('show');
 
-  const btnAll = document.getElementById('ttDownloadAll');
-  if (btnAll) {
-    btnAll.addEventListener('click', async () => {
-      const orig = btnAll.innerHTML;
-      btnAll.disabled = true;
-      for (let i = 0; i < d.images.length; i++) {
-        try {
-          btnAll.innerHTML = `<span class="ring"></span> ${i+1}/${d.images.length}...`;
-          const link = document.createElement('a');
-          link.href = d.images[i];
-          link.download = `slide_${i+1}.jpg`;
-          link.target = '_blank';
-          link.rel = 'noopener';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          await new Promise(r => setTimeout(r, 400));
-        } catch {}
-      }
-      btnAll.innerHTML = orig;
-      btnAll.disabled = false;
+    const btnAll = document.getElementById('ttDownloadAll');
+    if (btnAll) {
+      btnAll.addEventListener('click', async () => {
+        const orig = btnAll.innerHTML;
+        btnAll.disabled = true;
+        for (let i = 0; i < d.images.length; i++) {
+          try {
+            btnAll.innerHTML = `<span class="ring"></span> ${i+1}/${d.images.length}...`;
+            const link = document.createElement('a');
+            link.href = d.images[i];
+            link.download = `slide_${i+1}.jpg`;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            await new Promise(r => setTimeout(r, 400));
+          } catch {}
+        }
+        btnAll.innerHTML = orig;
+        btnAll.disabled = false;
 
-      setTimeout(() => {
-        ttClear();
-        ttUrl.value = '';
-      }, 500);
-    });
-  }
+        setTimeout(() => {
+          ttClear();
+          ttUrl.value = '';
+        }, 500);
+      });
+    }
 }
 
 ttResult.addEventListener('click', (e) => {
@@ -761,21 +761,35 @@ document.querySelectorAll('.dl-tab').forEach(tab => {
   });
 });
 
-const ytUrl     = document.getElementById('ytUrl');
-const ytFetch   = document.getElementById('ytFetch');
-const ytResult  = document.getElementById('ytResult');
-const ytHint    = document.getElementById('ytAutoHint');
+const ytUrl    = document.getElementById('ytUrl');
+const ytFetch  = document.getElementById('ytFetch');
+const ytResult = document.getElementById('ytResult');
+const ytHint   = document.getElementById('ytAutoHint');
+
+let ytMeta  = null;
+let ytMode  = 'video';
+let ytSheetEl = null;
+
+const YT_SOURCES = {
+  native: {
+    name: 'YouTube',
+    chip: '<i class="fa-brands fa-youtube"></i> YouTube',
+    hint: '<b>YouTube</b> — Download video asli dari yt, video diatas 360-720p tidak memiliki suara (audio terpisah dari sononye).'
+  }
+};
+
+let ytSource = localStorage.getItem('yt_source') || 'native';
+if (!(ytSource in YT_SOURCES)) ytSource = 'native';
 
 function ytEsc(value) {
-  return String(value == null ? '' : value).replace(/[&<>"']/g, char => ({
+  return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[char]));
+  }[c]));
 }
 
 function ytExtractId(input) {
   const value = String(input || '').trim();
   if (/^[A-Za-z0-9_-]{11}$/.test(value)) return value;
-
   try {
     const parsed = new URL(value.includes('://') ? value : `https://${value}`);
     const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
@@ -788,29 +802,33 @@ function ytExtractId(input) {
     if (/^[A-Za-z0-9_-]{11}$/.test(queryId)) return queryId;
     const match = parsed.pathname.match(/^\/(?:shorts|embed|v|live)\/([A-Za-z0-9_-]{11})(?:\/|$)/);
     return match ? match[1] : '';
-  } catch {
-    return '';
-  }
+  } catch { return ''; }
 }
 
 function ytLooksLikeShorts(input) {
   try {
     const parsed = new URL(input.includes('://') ? input : `https://${input}`);
     return /^\/shorts\/[A-Za-z0-9_-]{11}(?:\/|$)/.test(parsed.pathname);
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
 function ytFmtDuration(value) {
   const total = Number(value);
   if (!Number.isFinite(total) || total < 0) return '';
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const seconds = Math.floor(total % 60);
-  return hours
-    ? `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-    : `${minutes}:${String(seconds).padStart(2, '0')}`;
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = Math.floor(total % 60);
+  return h
+  ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+  : `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function ytFmtSize(bytes) {
+  const n = Number(bytes) || 0;
+  if (!n) return '';
+  if (n >= 1073741824) return (n / 1073741824).toFixed(2) + ' GB';
+  if (n >= 1048576) return (n / 1048576).toFixed(1) + ' MB';
+  return Math.max(1, Math.round(n / 1024)) + ' KB';
 }
 
 function ytMsg(type, html) {
@@ -830,121 +848,26 @@ function ytClear() {
 
 function ytDefaultLabel() {
   const v = ytUrl.value.trim();
-  if (v && ytLooksLikeShorts(v)) {
-    return '<i class="fa-solid fa-bolt"></i> Download Shorts YT';
-  }
-  if (v && ytExtractId(v)) {
-    return '<i class="fa-solid fa-cloud-arrow-down"></i> Download Video YT';
-  }
+  if (v && ytLooksLikeShorts(v)) return '<i class="fa-solid fa-bolt"></i> Download Shorts YT';
+  if (v && ytExtractId(v)) return '<i class="fa-solid fa-cloud-arrow-down"></i> Download Video YT';
   return '<i class="fa-solid fa-cloud-arrow-down"></i> Download';
 }
 
 function ytBusy(on) {
   ytFetch.disabled = on;
-  ytFetch.innerHTML = on
-    ? '<span class="ring"></span> Auto Detecting...'
-    : ytDefaultLabel();
+  ytFetch.innerHTML = on ? '<span class="ring"></span> Processing...' : ytDefaultLabel();
 }
 
 function ytSanitize(name) {
   return String(name || 'youtube-media')
-    .replace(/[\\/:*?"<>|]+/g, '_')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 120) || 'youtube-media';
+  .replace(/[\\/:*?"<>|]+/g, '_')
+  .replace(/\s+/g, ' ')
+  .trim()
+  .slice(0, 120) || 'youtube-media';
 }
 
 function ytProgressColor(pct) {
-  const hue = Math.max(0, Math.min(120, (pct / 100) * 120));
-  return `hsl(${hue}, 92%, 48%)`;
-}
-
-function ytMediaRow(item) {
-  const typeLabel = item.type === 'audio' ? 'Audio' : 'Video';
-  const name = item.format || `${item.quality || typeLabel} [.${item.extension || 'mp4'}]`;
-  const detail = [
-    typeLabel,
-    item.extension ? item.extension.toUpperCase() : '',
-    item.size || ''
-  ].filter(Boolean).join(' • ');
-
-  return `
-    <div class="yt-item">
-      <div class="yt-item-info">
-        <div class="yt-item-name">${ytEsc(name)}</div>
-        <div class="yt-item-sub">${ytEsc(detail)}</div>
-      </div>
-      <button type="button" class="tt-dl-btn tt-dl-btn-primary yt-dl-trigger"
-              data-url="${ytEsc(item.url)}"
-              data-name="${ytEsc(item.quality || 'youtube-media')}"
-              data-ext="${ytEsc(item.extension || 'mp4')}">
-        <i class="fa-solid fa-download"></i> Download
-      </button>
-    </div>
-  `;
-}
-
-function ytRender(response) {
-  const data = response.data || {};
-  const type = response._inputWasShorts || response.type === 'shorts' ? 'shorts' : 'video';
-  const thumbnail = data.thumbnail || (data.id
-    ? `https://i.ytimg.com/vi/${encodeURIComponent(data.id)}/hqdefault.jpg`
-    : '');
-  const duration = ytFmtDuration(data.duration);
-  const typeName = type === 'shorts' ? 'YouTube Shorts' : 'YouTube Video';
-
-  let mediaHtml = '';
-  if (data.url) {
-    mediaHtml = ytMediaRow({
-      type: data.format === 'mp3' ? 'audio' : 'video',
-      quality: 'Shorts',
-      format: `YouTube Shorts [.${data.format || 'mp4'}]`,
-      extension: data.format || 'mp4',
-      size: '',
-      url: data.url
-    });
-  } else {
-    const medias = Array.isArray(data.medias) ? data.medias : [];
-    mediaHtml = medias.length
-      ? medias.map(ytMediaRow).join('')
-      : '<div class="yt-empty"><i class="fa-solid fa-circle-exclamation"></i><br>Tidak ada format download yang tersedia.</div>';
-  }
-
-  ytResult.innerHTML = `
-    <div class="yt-meta">
-      ${thumbnail ? `<img class="yt-thumb" src="${ytEsc(thumbnail)}" alt="Thumbnail" loading="lazy">` : ''}
-      <div class="yt-meta-body">
-        <div class="yt-meta-title">${ytEsc(data.title || `YouTube ${data.id || ''}`)}</div>
-        <div class="yt-meta-sub">
-          <span class="yt-chip"><i class="fa-brands fa-youtube"></i> ${ytEsc(typeName)}</span>
-          ${duration ? `<span class="yt-chip"><i class="fa-solid fa-clock"></i> ${ytEsc(duration)}</span>` : ''}
-          <span class="yt-chip"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto Detected</span>
-        </div>
-      </div>
-    </div>
-    <div class="yt-list">${mediaHtml}</div>
-  `;
-  ytResult.classList.add('show');
-}
-
-async function ytRequest(input, forcedType = '') {
-  const params = new URLSearchParams({ url: input });
-
-  const detectedType = forcedType || (ytLooksLikeShorts(input) ? 'shorts' : '');
-  if (detectedType === 'shorts') params.set('type', 'shorts');
-
-  const finalUrl = `${YT_DL_API}?${params.toString()}`;
-  const res = await fetch(finalUrl, {
-    method: 'GET',
-    headers: { 'Accept': 'application/json' },
-    cache: 'no-store'
-  });
-  const data = await res.json().catch(() => ({}));
-
-  if (!res.ok || !data.success || !data.data) {
-    throw new Error(data.error || data.message || `HTTP ${res.status}`);
-  }
-  return data;
+  return `hsl(${Math.max(0, Math.min(120, (pct / 100) * 120))}, 92%, 48%)`;
 }
 
 function ytSetProgress(btn, pct) {
@@ -957,31 +880,227 @@ function ytSetProgress(btn, pct) {
   if (txt) txt.textContent = pct + '%';
 }
 
-async function ytDownloadBlob(url, filename, btn) {
-  let res = await fetch(url, {
-    method: 'GET',
-    mode: 'cors',
-    redirect: 'follow',
-    credentials: 'omit'
+function ytScoreFormat(v) {
+  let s = 0;
+  if (v.hasAudio) s += 100;
+  if (v.extension === 'mp4') s += 20;
+  if (Number(v.fps) >= 50) s += 2;
+  s += Math.min(10, (Number(v.bitrate) || 0) / 1000000);
+  return s;
+}
+
+function ytVideoOptions(data) {
+  const byHeight = new Map();
+  (data.videos || []).forEach(v => {
+    const h = Number(v.height);
+    if (!h) return;
+    const cur = byHeight.get(h);
+    if (!cur || ytScoreFormat(v) > ytScoreFormat(cur)) byHeight.set(h, v);
+  });
+    return [...byHeight.entries()]
+    .sort((a, b) => b[0] - a[0])
+    .map(([h, v]) => ({
+      label: h + 'p' + (Number(v.fps) >= 50 ? '60' : ''),
+                      sub: [
+                        String(v.extension || 'mp4').toUpperCase(),
+                      ytFmtSize(v.fileSize) || 'ukuran ikut stream',
+                      'itag ' + v.itag
+                      ].join(' · '),
+                      badge: v.hasAudio ? { text: 'ada suara', cls: '' } : { text: 'tanpa audio', cls: 'mute' },
+                      url: v.url,
+                      ext: v.extension || 'mp4',
+                      itag: String(v.itag),
+                      quality: v.quality || (h + 'p'),
+                      q: String(h)
+    }));
+}
+
+function ytAudioOptions(data) {
+  const best = new Map();
+  (data.audios || []).forEach(a => {
+    const isMp4 = a.extension === 'm4a';
+    const key = String(a.quality || '') + (isMp4 ? '|m4a' : '|webm');
+    const cur = best.get(key);
+    if (!cur || (Number(cur.bitrate) || 0) < (Number(a.bitrate) || 0)) best.set(key, a);
+  });
+    return [...best.values()]
+    .sort((a, b) => (Number(b.bitrate) || 0) - (Number(a.bitrate) || 0))
+    .map(a => ({
+      label: String(a.quality || 'audio').replace(/^(\d+)/, '$1 '),
+               sub: [
+                 'Audio-only',
+                 ytFmtSize(a.fileSize) || 'ukuran ikut stream',
+               'itag ' + a.itag
+               ].join(' · '),
+               badge: { text: String(a.extension || 'm4a').toUpperCase(), cls: '' },
+               url: a.url,
+               ext: a.extension || 'm4a',
+               itag: String(a.itag),
+               quality: a.quality || 'audio',
+               q: String(parseInt(a.quality, 10) || 128)
+    }));
+}
+
+function ytBuildSheet() {
+  if (ytSheetEl) return;
+  const el = document.createElement('div');
+  el.className = 'yt-sheet';
+  el.id = 'ytSheet';
+  el.innerHTML = `
+  <div class="yt-sheet-inner">
+  <div class="yt-sheet-head">
+  <img class="yt-sheet-thumb" id="ytSheetThumb" alt="">
+  <div class="yt-sheet-info">
+  <div class="yt-sheet-title" id="ytSheetTitle">-</div>
+  <div class="yt-sheet-sub" id="ytSheetSub"></div>
+  </div>
+  <button class="yt-sheet-x" id="ytSheetClose" type="button" title="Tutup">
+  <i class="fa-solid fa-xmark"></i>
+  </button>
+  </div>
+  <div class="yt-tabs">
+  <button class="yt-tab active" type="button" data-ytmode="video">
+  <i class="fa-solid fa-film"></i> Video MP4
+  </button>
+  <button class="yt-tab" type="button" data-ytmode="audio">
+  <i class="fa-solid fa-music"></i> Audio
+  </button>
+  </div>
+  <div class="yt-opts" id="ytOpts"></div>
+  <div class="yt-sheet-note" id="ytSheetNote"></div>
+  </div>
+  `;
+  document.body.appendChild(el);
+  ytSheetEl = el;
+
+  el.addEventListener('click', e => { if (e.target === el) ytCloseSheet(); });
+  el.querySelector('#ytSheetClose').addEventListener('click', ytCloseSheet);
+
+  el.querySelectorAll('.yt-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      ytMode = tab.dataset.ytmode;
+      el.querySelectorAll('.yt-tab').forEach(t => t.classList.toggle('active', t === tab));
+      ytRenderOptions();
+    });
   });
 
-  if ((res.status === 502 || res.status === 410 || res.status === 403) && ytUrl.value.trim()) {
-    btn.innerHTML = '<span class="ring"></span> Refresh token...';
-    try {
-      const fresh = await ytRequest(ytUrl.value.trim());
-      const medias = fresh.data?.medias || (fresh.data?.url ? [{ url: fresh.data.url }] : []);
-      const ext = filename.split('.').pop();
-      const match = medias.find(m => (m.extension || '').toLowerCase() === ext.toLowerCase()) || medias[0];
-      if (match && match.url) {
-        url = match.url;
-        res = await fetch(url, {
-          method: 'GET',
-          mode: 'cors',
-          redirect: 'follow',
-          credentials: 'omit'
-        });
-      }
-    } catch {}
+  el.querySelector('#ytOpts').addEventListener('click', e => {
+    const btn = e.target.closest('.yt-opt-btn');
+    if (btn && !btn.disabled) ytStartDownload(btn);
+  });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && el.classList.contains('show')) ytCloseSheet();
+    });
+}
+
+function ytOpenSheet() {
+  if (!ytMeta) return;
+  ytBuildSheet();
+  const d = ytMeta.data;
+
+  const thumb = ytSheetEl.querySelector('#ytSheetThumb');
+  thumb.style.display = '';
+  thumb.src = d.thumbnail || `https://i.ytimg.com/vi/${encodeURIComponent(d.id)}/hqdefault.jpg`;
+  thumb.onerror = () => { thumb.style.display = 'none'; };
+
+  ytSheetEl.querySelector('#ytSheetTitle').textContent = d.title || ('YouTube ' + d.id);
+
+  const sep = '<span style="opacity:.4">•</span>';
+  ytSheetEl.querySelector('#ytSheetSub').innerHTML = [
+    YT_SOURCES[ytSource].name.toUpperCase(),
+    d.duration ? ytEsc(ytFmtDuration(d.duration)) : '',
+    d.author ? ytEsc(d.author) : '',
+    ytMeta.type ? ytEsc(String(ytMeta.type).toUpperCase()) : '',
+    ytMeta.region ? 'region ' + ytEsc(ytMeta.region) : '',
+    ytMeta.client ? ytEsc(ytMeta.client) : ''
+  ].filter(Boolean).join(' ' + sep + ' ');
+
+  const adaAudio = ytAudioOptions(d).length > 0;
+  ytSheetEl.querySelectorAll('.yt-tab').forEach(t => {
+    const isAudioTab = t.dataset.ytmode === 'audio';
+    t.style.display = (isAudioTab && !adaAudio) ? 'none' : '';
+    t.classList.toggle('active', t.dataset.ytmode === ytMode);
+  });
+
+  ytRenderOptions();
+  ytSheetEl.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function ytCloseSheet() {
+  if (!ytSheetEl) return;
+  ytSheetEl.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function ytRenderOptions() {
+  if (!ytMeta) return;
+  const box  = ytSheetEl.querySelector('#ytOpts');
+  const note = ytSheetEl.querySelector('#ytSheetNote');
+  const d    = ytMeta.data;
+  const isAudio = ytMode === 'audio';
+  const opts = isAudio ? ytAudioOptions(d) : ytVideoOptions(d);
+
+  if (!opts.length) {
+    box.innerHTML = `<div class="yt-empty"><i class="fa-solid fa-circle-exclamation"></i><br>
+    Gak ada format ${isAudio ? 'audio' : 'video'} di video ini.</div>`;
+  } else {
+    box.innerHTML = opts.map(o => {
+      const sub = o.sub;
+      const badge = o.badge;
+      return `
+      <div class="yt-opt">
+      <div class="yt-opt-info">
+      <div class="yt-opt-name">
+      ${ytEsc(o.label)}
+      <span class="yt-opt-badge ${badge.cls}">${ytEsc(badge.text)}</span>
+      </div>
+      <div class="yt-opt-sub">${ytEsc(sub)}</div>
+      </div>
+      <button class="yt-opt-btn" type="button"
+      data-url="${ytEsc(o.url)}"
+      data-ext="${ytEsc(o.ext)}"
+      data-itag="${ytEsc(o.itag)}"
+      data-quality="${ytEsc(o.q)}"
+      data-format="${isAudio ? 'mp3' : 'mp4'}"
+      data-label="${ytEsc(o.label)}"
+      data-title="${ytEsc(ytSanitize(d.title || d.id))}"
+      title="Download ${ytEsc(o.label)}">
+      <i class="fa-solid fa-download"></i>
+      </button>
+      </div>
+      `;
+    }).join('');
+  }
+
+
+  if (isAudio) {
+    note.innerHTML = `Audio-only asli YouTube (bukan hasil convert MP3). Link <b>dibuat ulang tiap diklik</b>, jadi gak ada masalah expired.`;
+    return;
+  }
+
+  const adaMuxed = opts.some(o => o.badge.cls !== 'mute');
+  note.innerHTML = adaMuxed
+  ? `Badge <b>ada suara</b> = 1 file langsung, suara dan video jadi satu. Badge <b>tanpa audio</b> = video-only — biasanya 1080p ke atas; suaranya ambil di tab <b>Audio</b>.`
+  : `<b style="color:#fcd34d">⚠️ Video ini gak nyediain format 1-file bersuara</b> — semua opsi di atas <b>video-only</b>. Kalau butuh suaranya, download videonya di sini + audionya lewat tab <b>Audio</b>.`;
+}
+
+async function ytDownloadFile(url, filename, btn) {
+  let res = await fetch(url, { method: 'GET', redirect: 'follow' });
+
+  if (!res.ok && [403, 404, 410, 502, 503].includes(res.status) && ytMeta) {
+    btn.innerHTML = '<span class="ring"></span>';
+    const fresh = await ytRequestMeta(ytUrl.value.trim()).catch(() => null);
+    if (fresh) {
+      ytMeta = ytNormalizeMeta(fresh);
+      const all = [...(ytMeta.data.videos || []), ...(ytMeta.data.audios || [])];
+      const same = all.find(x => String(x.itag) === String(btn.dataset.itag));
+      const retryUrl = same && same.url
+      ? same.url
+      : `${YT_DL_API}?dl=${encodeURIComponent(ytMeta.data.id)}&itag=${encodeURIComponent(btn.dataset.itag)}&q=${encodeURIComponent(btn.dataset.quality || btn.dataset.label)}&ext=${encodeURIComponent(btn.dataset.ext)}`;
+      res = await fetch(retryUrl, { method: 'GET', redirect: 'follow' });
+    }
   }
 
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -996,32 +1115,28 @@ async function ytDownloadBlob(url, filename, btn) {
   }
 
   const total = Number(res.headers.get('content-length')) || 0;
-  const reader = res.body && res.body.getReader ? res.body.getReader() : null;
+  const canStream = total > 0 && res.body && typeof res.body.getReader === 'function';
   let blob;
 
-  if (reader && total > 0) {
-    btn.innerHTML = `<span class="yt-dl-progress"><span class="yt-dl-progress-fill" style="width:0%;background:${ytProgressColor(0)}"></span><span class="yt-dl-progress-text">0%</span></span>`;
-    ytSetProgress(btn, 0);
-
+  if (canStream) {
+    const reader = res.body.getReader();
     const chunks = [];
     let received = 0;
+    btn.innerHTML = `<span class="yt-dl-progress"><span class="yt-dl-progress-fill" style="width:0%;background:${ytProgressColor(0)}"></span><span class="yt-dl-progress-text">0%</span></span>`;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       chunks.push(value);
       received += value.length;
-      const pct = Math.min(99, Math.round((received / total) * 100));
-      ytSetProgress(btn, pct);
+      ytSetProgress(btn, Math.min(99, Math.round((received / total) * 100)));
     }
-    blob = new Blob(chunks, {
-      type: res.headers.get('content-type') || 'application/octet-stream'
-    });
+    blob = new Blob(chunks, { type: res.headers.get('content-type') || 'application/octet-stream' });
     ytSetProgress(btn, 100);
-    await new Promise(r => setTimeout(r, 250));
+    await new Promise(r => setTimeout(r, 200));
   } else {
     btn.innerHTML = `<span class="yt-dl-progress"><span class="yt-dl-progress-fill" style="width:100%;background:${ytProgressColor(100)}"></span><span class="yt-dl-progress-text">100%</span></span>`;
     blob = await res.blob();
-    await new Promise(r => setTimeout(r, 250));
+    await new Promise(r => setTimeout(r, 200));
   }
 
   const blobUrl = URL.createObjectURL(blob);
@@ -1035,76 +1150,153 @@ async function ytDownloadBlob(url, filename, btn) {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
 }
 
-document.getElementById('ytResult').addEventListener('click', async (e) => {
-  const btn = e.target.closest('.yt-dl-trigger');
-  if (!btn || btn.disabled) return;
-  e.preventDefault();
-  e.stopPropagation();
 
-  const url  = btn.dataset.url;
-  const name = ytSanitize(btn.dataset.name || 'youtube-media');
-  const ext  = btn.dataset.ext || 'mp4';
-  const filename = `${name}.${ext}`;
+async function ytStartDownload(btn) {
+  const label = btn.dataset.label || 'file';
+  const ext   = btn.dataset.ext || 'mp4';
+  const title = btn.dataset.title || 'youtube-media';
+  const orig  = btn.innerHTML;
+  const origBg = btn.style.background;
 
-  const orig = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = `<span class="yt-dl-progress"><span class="yt-dl-progress-fill" style="width:0%;background:${ytProgressColor(0)}"></span><span class="yt-dl-progress-text">0%</span></span>`;
+  btn.innerHTML = '<span class="ring"></span>';
+  ytMsg('pend', `<span class="ring"></span> Nyiapin <b>${ytEsc(label)}</b> (${ytEsc(ext.toUpperCase())})...`);
 
   try {
-    await ytDownloadBlob(url, filename, btn);
-    btn.innerHTML = '<i class="fa-solid fa-check"></i> Selesai!';
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.innerHTML = orig;
-    }, 1800);
+    let target = btn.dataset.url;
+    let fname  = `${title}-${label}.${ext}`;
+
+
+    await ytDownloadFile(target, fname, btn);
+    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+    btn.style.background = 'linear-gradient(135deg, #00ff9d, #00f0ff)';
+    ytMsg('ok', `<i class="fa-solid fa-circle-check"></i> <b>${ytEsc(label)}</b> beres di-download. Pilih resolusi lain kalau perlu.`);
   } catch (err) {
-    console.error('YT download error:', err);
-    btn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Gagal';
+    btn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+    btn.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+    ytMsg('fail', `<i class="fa-solid fa-circle-xmark"></i> Gagal download ${ytEsc(label)}: ${ytEsc(err.message)}`);
+  } finally {
     setTimeout(() => {
-      btn.disabled = false;
       btn.innerHTML = orig;
+      btn.style.background = origBg;
+      btn.disabled = false;
     }, 2200);
-    ytMsg('fail', `<i class="fa-solid fa-circle-xmark"></i> Download gagal: ${ytEsc(err.message || 'Unknown error')}`);
   }
-});
+}
+
+async function ytRequestMeta(input) {
+  const params = new URLSearchParams({ url: input });
+  if (ytLooksLikeShorts(input)) params.set('type', 'shorts');
+  const res = await fetch(`${YT_DL_API}?${params}`, {
+    headers: { 'Accept': 'application/json' },
+    cache: 'no-store'
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || !json.success || !json.data) {
+    throw new Error(json.error || json.message || `HTTP ${res.status}`);
+  }
+  return json;
+}
+
+
+
+
+
+
+
+function ytNormalizeMeta(json) {
+  return {
+    id: json.data.id || ytExtractId(ytUrl.value.trim()),
+    data: json.data,
+    type: json.type || 'video',
+    region: json.region || '',
+    client: json.client || '',
+    at: Date.now()
+  };
+}
+
+function ytRenderInfo() {
+  const d  = ytMeta.data;
+  const nv = ytVideoOptions(d).length;
+  const na = ytAudioOptions(d).length;
+  const thumb = d.thumbnail || `https://i.ytimg.com/vi/${encodeURIComponent(d.id)}/hqdefault.jpg`;
+
+  ytResult.innerHTML = `
+  <div class="yt-meta" id="ytInfoBar" style="cursor:pointer;" title="Klik buat buka daftar resolusi">
+  <img class="yt-thumb" src="${ytEsc(thumb)}" alt="" loading="lazy"
+  onerror="this.style.display='none'">
+  <div class="yt-meta-body">
+  <div class="yt-meta-title">${ytEsc(d.title || d.id)}</div>
+  <div class="yt-meta-sub">
+  <span class="yt-chip" style="color:var(--clr-d)">${YT_SOURCES[ytSource].chip}</span>
+  <span class="yt-chip"><i class="fa-solid fa-film"></i> ${nv} resolusi</span>
+  <span class="yt-chip"><i class="fa-solid fa-music"></i> ${na} audio</span>
+  ${d.duration ? `<span class="yt-chip"><i class="fa-solid fa-clock"></i> ${ytEsc(ytFmtDuration(d.duration))}</span>` : ''}
+  ${ytMeta.region ? `<span class="yt-chip"><i class="fa-solid fa-server"></i> ${ytEsc(ytMeta.region)}</span>` : ''}
+  </div>
+  <div class="yt-item-sub" style="margin-top:7px;">
+  <i class="fa-solid fa-hand-pointer"></i> Klik kartu ini atau tombol Download buat buka daftar resolusi
+  </div>
+  </div>
+  </div>
+  `;
+  ytResult.classList.add('show');
+}
 
 async function handleYouTubeDownload() {
   const input = ytUrl.value.trim();
-  ytClear();
 
   if (!input) {
     return ytMsg('fail', '<i class="fa-solid fa-triangle-exclamation"></i> Masukkan URL YouTube!');
   }
-  if (!ytExtractId(input)) {
+  const id = ytExtractId(input);
+  if (!id) {
     return ytMsg('fail', '<i class="fa-solid fa-triangle-exclamation"></i> URL atau ID YouTube tidak valid!');
   }
 
-  const inputWasShorts = ytLooksLikeShorts(input);
+  if (ytMeta && ytMeta.id === id && (Date.now() - ytMeta.at) < 30 * 60 * 1000) {
+    ytMsg('ok', '<i class="fa-solid fa-list"></i> Daftar resolusi yang ada di video ini:');
+    return ytOpenSheet();
+  }
+
+  ytResult.classList.remove('show');
+  ytResult.innerHTML = '';
+  ytMsg('pend', '<span class="ring"></span> Baca daftar resolusi asli dari video...');
   ytBusy(true);
-  ytMsg('pend', `<span class="ring"></span> ${inputWasShorts ? 'Mengambil format Shorts' : 'Mengambil format video'}...`);
 
   try {
-    const data = await ytRequest(input);
-    data._inputWasShorts = inputWasShorts;
-    ytRender(data);
-    const detected = inputWasShorts || data.type === 'shorts' ? 'YouTube Shorts' : 'YouTube Video';
-    ytMsg('ok', `<i class="fa-solid fa-circle-check"></i> <b>${ytEsc(detected)}</b> terdeteksi. Pilih format untuk mulai download.`);
-  } catch (error) {
-    ytMsg('fail', `<i class="fa-solid fa-circle-xmark"></i> ${ytEsc(error.message || 'Gagal mengambil data YouTube.')}`);
+    const json = await ytRequestMeta(input);
+    ytMeta = ytNormalizeMeta(json);
+    ytMode = 'video';
+    ytRenderInfo();
+    ytOpenSheet();
+    const nv = ytVideoOptions(ytMeta.data).length;
+    const na = ytAudioOptions(ytMeta.data).length;
+    ytMsg('ok',
+          `<i class="fa-solid fa-circle-check"></i> <b>${nv} resolusi</b> + <b>${na} audio</b> di video ini — pilih salah satu di daftar.`);
+  } catch (err) {
+    ytMsg('fail', `<i class="fa-solid fa-circle-xmark"></i> Gagal ambil data: ${ytEsc(err.message)}`);
   } finally {
     ytBusy(false);
   }
 }
 
+
 ytFetch.addEventListener('click', handleYouTubeDownload);
-ytUrl.addEventListener('keydown', event => {
-  if (event.key === 'Enter') handleYouTubeDownload();
+ytUrl.addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleYouTubeDownload();
 });
 ytUrl.addEventListener('input', () => {
-  const value = ytUrl.value.trim();
-  const label = ytLooksLikeShorts(value) ? 'Shorts terdeteksi dari URL' : 'Video/ID akan dideteksi oleh API';
-  ytHint.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> ${ytEsc(label)} saat tombol Download ditekan.`;
+  const v = ytUrl.value.trim();
+  const status = !v
+  ? ''
+  : (ytLooksLikeShorts(v) ? 'Shorts terdeteksi — ' : (ytExtractId(v) ? 'Video terdeteksi — ' : 'Link belum valid — '));
+  ytHint.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> ' + status +
+  'tekan <b>Download</b>';
   if (!ytFetch.disabled) ytFetch.innerHTML = ytDefaultLabel();
+});
+ytResult.addEventListener('click', () => {
+  if (ytMeta) ytOpenSheet();
 });
 
 ytFetch.innerHTML = ytDefaultLabel();
@@ -1135,8 +1327,8 @@ function spFmtDur(sec) {
 function spBusy(on) {
   spBtn.disabled = on;
   spBtn.innerHTML = on
-    ? '<span class="ring"></span> Processing...'
-    : '<i class="fa-solid fa-magnifying-glass"></i> Search';
+  ? '<span class="ring"></span> Processing...'
+  : '<i class="fa-solid fa-magnifying-glass"></i> Search';
 }
 
 async function spFetchJson(params) {
@@ -1178,15 +1370,15 @@ function spStreamUrl(t) {
 function spDlBtnsHtml(t) {
   const via = spStreamUrl(t);
   return `
-    ${via ? `<a class="tt-dl-btn tt-dl-btn-primary" href="${spEsc(via)}" target="_blank" rel="noopener">
-      <i class="fa-solid fa-download"></i> Download MP3
-    </a>` : ''}
-    <a class="tt-dl-btn tt-dl-btn-secondary" href="${spEsc(t.download)}" target="_blank" rel="noopener">
-      <i class="fa-solid fa-link"></i> Direct Link
-    </a>
-    ${via ? `<button class="tt-dl-btn tt-dl-btn-secondary" type="button" data-spcopy="${spEsc(via)}">
-      <i class="fa-solid fa-copy"></i> Copy Link
-    </button>` : ''}
+  ${via ? `<a class="tt-dl-btn tt-dl-btn-primary" href="${spEsc(via)}" target="_blank" rel="noopener">
+  <i class="fa-solid fa-download"></i> Download MP3
+  </a>` : ''}
+  <a class="tt-dl-btn tt-dl-btn-secondary" href="${spEsc(t.download)}" target="_blank" rel="noopener">
+  <i class="fa-solid fa-link"></i> Direct Link
+  </a>
+  ${via ? `<button class="tt-dl-btn tt-dl-btn-secondary" type="button" data-spcopy="${spEsc(via)}">
+  <i class="fa-solid fa-copy"></i> Copy Link
+  </button>` : ''}
   `;
 }
 
@@ -1198,13 +1390,13 @@ function renderSp(data) {
 
   if ((data.type === 'album' || data.type === 'playlist') && data.title) {
     html += `
-      <div class="sp-coll">
-        <div class="sp-coll-icon"><i class="fa-solid fa-${data.type === 'album' ? 'compact-disc' : 'list-ul'}"></i></div>
-        <div class="sp-coll-info">
-          <div class="sp-coll-title">${spEsc(data.title)}</div>
-          <div class="sp-coll-sub">${data.owner ? '👤 ' + spEsc(data.owner) + ' • ' : ''}Total ${spEsc(data.total || tracks.length)} track</div>
-        </div>
-      </div>
+    <div class="sp-coll">
+    <div class="sp-coll-icon"><i class="fa-solid fa-${data.type === 'album' ? 'compact-disc' : 'list-ul'}"></i></div>
+    <div class="sp-coll-info">
+    <div class="sp-coll-title">${spEsc(data.title)}</div>
+    <div class="sp-coll-sub">${data.owner ? '👤 ' + spEsc(data.owner) + ' • ' : ''}Total ${spEsc(data.total || tracks.length)} track</div>
+    </div>
+    </div>
     `;
   }
 
@@ -1212,25 +1404,25 @@ function renderSp(data) {
     const t = tracks[0];
     if (t.error || (!t.download && !t.download_proxy)) {
       html += `
-        <div class="sp-single">
-          ${t.cover ? `<img class="sp-single-cover" src="${spEsc(t.cover)}" alt="" onerror="this.style.display='none'">` : ''}
-          <div class="sp-track-info">
-            <div class="sp-track-title">${spEsc(t.title)}</div>
-            <div class="sp-track-artist">${spEsc(t.artist)}</div>
-          </div>
-        </div>
-        <div class="sp-more" style="color:#fca5a5;"><i class="fa-solid fa-circle-xmark"></i> ${spEsc(t.error || 'Link download gak ketemu 🤔')}</div>
+      <div class="sp-single">
+      ${t.cover ? `<img class="sp-single-cover" src="${spEsc(t.cover)}" alt="" onerror="this.style.display='none'">` : ''}
+      <div class="sp-track-info">
+      <div class="sp-track-title">${spEsc(t.title)}</div>
+      <div class="sp-track-artist">${spEsc(t.artist)}</div>
+      </div>
+      </div>
+      <div class="sp-more" style="color:#fca5a5;"><i class="fa-solid fa-circle-xmark"></i> ${spEsc(t.error || 'Link download gak ketemu 🤔')}</div>
       `;
     } else {
       html += `
-        <div class="sp-single">
-          ${t.cover ? `<img class="sp-single-cover" src="${spEsc(t.cover)}" alt="" onerror="this.style.display='none'">` : ''}
-          <div class="sp-track-info">
-            <div class="sp-track-title">${spEsc(t.title)}</div>
-            <div class="sp-track-artist">${spEsc(t.artist)}${t.duration_formatted ? ' • ' + spEsc(t.duration_formatted) : ''}</div>
-          </div>
-        </div>
-        <div class="sp-dl-btns">${spDlBtnsHtml(t)}</div>
+      <div class="sp-single">
+      ${t.cover ? `<img class="sp-single-cover" src="${spEsc(t.cover)}" alt="" onerror="this.style.display='none'">` : ''}
+      <div class="sp-track-info">
+      <div class="sp-track-title">${spEsc(t.title)}</div>
+      <div class="sp-track-artist">${spEsc(t.artist)}${t.duration_formatted ? ' • ' + spEsc(t.duration_formatted) : ''}</div>
+      </div>
+      </div>
+      <div class="sp-dl-btns">${spDlBtnsHtml(t)}</div>
       `;
     }
   } else if (tracks.length) {
@@ -1238,22 +1430,22 @@ function renderSp(data) {
     tracks.forEach((it, i) => {
       const n = it.no || (i + 1);
       html += `
-        <div class="sp-track">
-          <div class="sp-track-num">${n}</div>
-          ${it.cover
-            ? `<img class="sp-track-cover" src="${spEsc(it.cover)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
-            : `<div class="sp-track-cover"></div>`}
-          <div class="sp-track-info">
-            <div class="sp-track-title">${spEsc(it.title)}</div>
-            <div class="sp-track-artist">${spEsc(it.artist)}${it.error ? ' • ⚠️ ' + spEsc(it.error) : ''}</div>
-          </div>
-          <div class="sp-track-dur">${spEsc(it.duration_formatted || spFmtDur(it.duration))}</div>
-          <button class="sp-track-dl" type="button" data-spdl="${n}" title="Download MP3">
-            <i class="fa-solid fa-download"></i>
-          </button>
+      <div class="sp-track">
+      <div class="sp-track-num">${n}</div>
+      ${it.cover
+        ? `<img class="sp-track-cover" src="${spEsc(it.cover)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
+        : `<div class="sp-track-cover"></div>`}
+        <div class="sp-track-info">
+        <div class="sp-track-title">${spEsc(it.title)}</div>
+        <div class="sp-track-artist">${spEsc(it.artist)}${it.error ? ' • ⚠️ ' + spEsc(it.error) : ''}</div>
+        </div>
+        <div class="sp-track-dur">${spEsc(it.duration_formatted || spFmtDur(it.duration))}</div>
+        <button class="sp-track-dl" type="button" data-spdl="${n}" title="Download MP3">
+        <i class="fa-solid fa-download"></i>
+        </button>
         </div>
         <div class="sp-dl-box" data-spbox="${n}" hidden></div>
-      `;
+        `;
     });
     html += `</div>`;
     if ((data.total || 0) > tracks.length) {
@@ -1304,8 +1496,8 @@ spResult.addEventListener('click', async (e) => {
       throw new Error((t && t.error) || data.message || 'Link download gak ketemu 🤔');
     }
     box.innerHTML = `
-      <div class="sp-dl-title"><i class="fa-solid fa-circle-check"></i> <b>${spEsc(t.title)}</b> — ${spEsc(t.artist)}</div>
-      <div class="sp-dl-btns">${spDlBtnsHtml(t)}</div>
+    <div class="sp-dl-title"><i class="fa-solid fa-circle-check"></i> <b>${spEsc(t.title)}</b> — ${spEsc(t.artist)}</div>
+    <div class="sp-dl-btns">${spDlBtnsHtml(t)}</div>
     `;
   } catch (err) {
     box.innerHTML = `<div style="font-size:11px;color:#fca5a5;font-family:'Courier New',monospace;line-height:1.6;"><i class="fa-solid fa-circle-xmark"></i> ${spEsc(err.message)}</div>`;
@@ -1380,8 +1572,8 @@ function scDur(t) {
 function scBusy(on) {
   scBtn.disabled = on;
   scBtn.innerHTML = on
-    ? '<span class="ring"></span> Processing...'
-    : '<i class="fa-solid fa-magnifying-glass"></i> Search';
+  ? '<span class="ring"></span> Processing...'
+  : '<i class="fa-solid fa-magnifying-glass"></i> Search';
 }
 
 async function scFetchJson(params) {
@@ -1419,11 +1611,18 @@ function scNorm(data) {
       ...data,
       type: data.type || 'track',
       tracks: [{
-        no: 1, id: data.id || null, title: data.title || '?', artist: data.artist || '?',
-        duration: data.duration || 0, duration_formatted: data.duration_formatted || '',
-        cover: data.cover || '', url: data.url || '',
-        download: data.download || '', download_proxy: data.download_proxy || '',
-        cover_download: data.cover_download || '', cover_proxy: data.cover_proxy || '',
+        no: 1,
+        id: data.id || null,
+        title: data.title || '?',
+        artist: data.artist || '?',
+        duration: data.duration || 0,
+        duration_formatted: data.duration_formatted || '',
+        cover: data.cover || '',
+        url: data.url || '',
+        download: data.download || '',
+        download_proxy: data.download_proxy || '',
+        cover_download: data.cover_download || '',
+        cover_proxy: data.cover_proxy || '',
         error: data.error || ''
       }]
     };
@@ -1441,20 +1640,20 @@ function scStreamUrl(t) {
 function scDlBtnsHtml(t) {
   const via  = scStreamUrl(t);
   const cVia = (t.cover_proxy && t.cover_proxy.includes('dl=')) ? t.cover_proxy
-             : (t.cover_download ? `${SC_API}?dl=${encodeURIComponent(t.cover_download)}&name=${encodeURIComponent(t.artist + ' - ' + t.title + ' cover')}` : '');
+  : (t.cover_download ? `${SC_API}?dl=${encodeURIComponent(t.cover_download)}&name=${encodeURIComponent(t.artist + ' - ' + t.title + ' cover')}` : '');
   return `
-    ${via ? `<a class="tt-dl-btn tt-dl-btn-primary" href="${scEsc(via)}" target="_blank" rel="noopener">
-      <i class="fa-solid fa-download"></i> Download MP3
-    </a>` : ''}
-    ${t.download ? `<a class="tt-dl-btn tt-dl-btn-secondary" href="${scEsc(t.download)}" target="_blank" rel="noopener">
-      <i class="fa-solid fa-link"></i> Direct Link
-    </a>` : ''}
-    ${via ? `<button class="tt-dl-btn tt-dl-btn-secondary" type="button" data-sccopy="${scEsc(via)}">
-      <i class="fa-solid fa-copy"></i> Copy Link
-    </button>` : ''}
-    ${cVia ? `<a class="tt-dl-btn tt-dl-btn-secondary" href="${scEsc(cVia)}" target="_blank" rel="noopener">
-      <i class="fa-solid fa-image"></i> Download Cover
-    </a>` : ''}
+  ${via ? `<a class="tt-dl-btn tt-dl-btn-primary" href="${scEsc(via)}" target="_blank" rel="noopener">
+  <i class="fa-solid fa-download"></i> Download MP3
+  </a>` : ''}
+  ${t.download ? `<a class="tt-dl-btn tt-dl-btn-secondary" href="${scEsc(t.download)}" target="_blank" rel="noopener">
+  <i class="fa-solid fa-link"></i> Direct Link
+  </a>` : ''}
+  ${via ? `<button class="tt-dl-btn tt-dl-btn-secondary" type="button" data-sccopy="${scEsc(via)}">
+  <i class="fa-solid fa-copy"></i> Copy Link
+  </button>` : ''}
+  ${cVia ? `<a class="tt-dl-btn tt-dl-btn-secondary" href="${scEsc(cVia)}" target="_blank" rel="noopener">
+  <i class="fa-solid fa-image"></i> Download Cover
+  </a>` : ''}
   `;
 }
 
@@ -1467,13 +1666,13 @@ function renderSc(data) {
 
   if ((type === 'playlist' || type === 'album') && (data.title || data.query)) {
     html += `
-      <div class="sp-coll">
-        <div class="sp-coll-icon"><i class="fa-solid fa-list-ul"></i></div>
-        <div class="sp-coll-info">
-          <div class="sp-coll-title">${scEsc(data.title || data.query)}</div>
-          <div class="sp-coll-sub">Total ${scEsc(data.total || tracks.length)} track</div>
-        </div>
-      </div>
+    <div class="sp-coll">
+    <div class="sp-coll-icon"><i class="fa-solid fa-list-ul"></i></div>
+    <div class="sp-coll-info">
+    <div class="sp-coll-title">${scEsc(data.title || data.query)}</div>
+    <div class="sp-coll-sub">Total ${scEsc(data.total || tracks.length)} track</div>
+    </div>
+    </div>
     `;
   }
 
@@ -1481,25 +1680,25 @@ function renderSc(data) {
     const t = tracks[0];
     if (t.error || (!t.download && !t.download_proxy)) {
       html += `
-        <div class="sp-single">
-          ${t.cover ? `<img class="sp-single-cover" src="${scEsc(t.cover)}" alt="" onerror="this.style.display='none'">` : ''}
-          <div class="sp-track-info">
-            <div class="sp-track-title">${scEsc(t.title)}</div>
-            <div class="sp-track-artist">${scEsc(t.artist)}</div>
-          </div>
-        </div>
-        <div class="sp-more" style="color:#fca5a5;"><i class="fa-solid fa-circle-xmark"></i> ${scEsc(t.error || 'Link download gak ketemu 🤔')}</div>
+      <div class="sp-single">
+      ${t.cover ? `<img class="sp-single-cover" src="${scEsc(t.cover)}" alt="" onerror="this.style.display='none'">` : ''}
+      <div class="sp-track-info">
+      <div class="sp-track-title">${scEsc(t.title)}</div>
+      <div class="sp-track-artist">${scEsc(t.artist)}</div>
+      </div>
+      </div>
+      <div class="sp-more" style="color:#fca5a5;"><i class="fa-solid fa-circle-xmark"></i> ${scEsc(t.error || 'Link download gak ketemu 🤔')}</div>
       `;
     } else {
       html += `
-        <div class="sp-single">
-          ${t.cover ? `<img class="sp-single-cover" src="${scEsc(t.cover)}" alt="" onerror="this.style.display='none'">` : ''}
-          <div class="sp-track-info">
-            <div class="sp-track-title">${scEsc(t.title)}</div>
-            <div class="sp-track-artist">${scEsc(t.artist)}${scDur(t) ? ' • ' + scEsc(scDur(t)) : ''}</div>
-          </div>
-        </div>
-        <div class="sp-dl-btns">${scDlBtnsHtml(t)}</div>
+      <div class="sp-single">
+      ${t.cover ? `<img class="sp-single-cover" src="${scEsc(t.cover)}" alt="" onerror="this.style.display='none'">` : ''}
+      <div class="sp-track-info">
+      <div class="sp-track-title">${scEsc(t.title)}</div>
+      <div class="sp-track-artist">${scEsc(t.artist)}${scDur(t) ? ' • ' + scEsc(scDur(t)) : ''}</div>
+      </div>
+      </div>
+      <div class="sp-dl-btns">${scDlBtnsHtml(t)}</div>
       `;
     }
   } else if (tracks.length) {
@@ -1507,22 +1706,22 @@ function renderSc(data) {
     tracks.forEach((it, i) => {
       const n = it.no || (i + 1);
       html += `
-        <div class="sp-track">
-          <div class="sp-track-num">${n}</div>
-          ${it.cover
-            ? `<img class="sp-track-cover" src="${scEsc(it.cover)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
-            : `<div class="sp-track-cover"></div>`}
-          <div class="sp-track-info">
-            <div class="sp-track-title">${scEsc(it.title)}</div>
-            <div class="sp-track-artist">${scEsc(it.artist)}${it.error ? ' • ⚠️ ' + scEsc(it.error) : ''}</div>
-          </div>
-          <div class="sp-track-dur">${scEsc(scDur(it))}</div>
-          <button class="sp-track-dl" type="button" data-scdl="${n}" title="Download MP3">
-            <i class="fa-solid fa-download"></i>
-          </button>
+      <div class="sp-track">
+      <div class="sp-track-num">${n}</div>
+      ${it.cover
+        ? `<img class="sp-track-cover" src="${scEsc(it.cover)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
+        : `<div class="sp-track-cover"></div>`}
+        <div class="sp-track-info">
+        <div class="sp-track-title">${scEsc(it.title)}</div>
+        <div class="sp-track-artist">${scEsc(it.artist)}${it.error ? ' • ⚠️ ' + scEsc(it.error) : ''}</div>
+        </div>
+        <div class="sp-track-dur">${scEsc(scDur(it))}</div>
+        <button class="sp-track-dl" type="button" data-scdl="${n}" title="Download MP3">
+        <i class="fa-solid fa-download"></i>
+        </button>
         </div>
         <div class="sp-dl-box" data-scbox="${n}" hidden></div>
-      `;
+        `;
     });
     html += `</div>`;
     if ((data.total || 0) > tracks.length) {
@@ -1573,8 +1772,8 @@ scResult.addEventListener('click', async (e) => {
       throw new Error((t && t.error) || data.message || 'Link download gak ketemu 🤔');
     }
     box.innerHTML = `
-      <div class="sp-dl-title"><i class="fa-solid fa-circle-check"></i> <b>${scEsc(t.title)}</b> — ${scEsc(t.artist)}</div>
-      <div class="sp-dl-btns">${scDlBtnsHtml(t)}</div>
+    <div class="sp-dl-title"><i class="fa-solid fa-circle-check"></i> <b>${scEsc(t.title)}</b> — ${scEsc(t.artist)}</div>
+    <div class="sp-dl-btns">${scDlBtnsHtml(t)}</div>
     `;
   } catch (err) {
     box.innerHTML = `<div style="font-size:11px;color:#fca5a5;font-family:'Courier New',monospace;line-height:1.6;"><i class="fa-solid fa-circle-xmark"></i> ${scEsc(err.message)}</div>`;
@@ -1772,7 +1971,7 @@ async function tmLoadState() {
     if (savedEmail && savedToken) {
       tmSetEmail(savedEmail, savedPass, savedToken);
       tmMsg('ok',
-        `<i class="fa-solid fa-circle-check"></i> <b>Session dipulihkan</b><br><code>${savedEmail}</code>`);
+            `<i class="fa-solid fa-circle-check"></i> <b>Session dipulihkan</b><br><code>${savedEmail}</code>`);
     }
   } catch {}
 }
@@ -1781,11 +1980,11 @@ function tmRenderMessages(msgs) {
   if (!msgs || !msgs.length) {
     if (!tmInbox.querySelector('.tm-empty') && !tmInbox.querySelector('.tm-msg')) {
       tmInbox.innerHTML = `
-        <div class="tm-empty">
-          <i class="fa-solid fa-envelope"></i>
-          Belum ada pesan masuk.<br>
-          Tunggu sebentar, inbox akan muncul otomatis.
-        </div>
+      <div class="tm-empty">
+      <i class="fa-solid fa-envelope"></i>
+      Belum ada pesan masuk.<br>
+      Tunggu sebentar, inbox akan muncul otomatis.
+      </div>
       `;
     }
     return;
@@ -1810,13 +2009,13 @@ function buildTmMessage(m) {
   const dateTxt = m.createdAt || '';
 
   div.innerHTML = `
-    <div class="tm-msg-head">
-      <span class="tm-msg-dot"></span>
-      <span class="tm-msg-from">${fromTxt}</span>
-    </div>
-    <div class="tm-msg-subject">${subjectTxt}</div>
-    <div class="tm-msg-date">${dateTxt}</div>
-    <div class="tm-msg-body"><span style="color:#64748b;">Klik untuk memuat isi pesan…</span></div>
+  <div class="tm-msg-head">
+  <span class="tm-msg-dot"></span>
+  <span class="tm-msg-from">${fromTxt}</span>
+  </div>
+  <div class="tm-msg-subject">${subjectTxt}</div>
+  <div class="tm-msg-date">${dateTxt}</div>
+  <div class="tm-msg-body"><span style="color:#64748b;">Klik untuk memuat isi pesan…</span></div>
   `;
 
   div.addEventListener('click', async (e) => {
@@ -1842,9 +2041,9 @@ function buildTmMessage(m) {
         });
 
         bodyEl.innerHTML = `
-          ${bodyClean.slice(0, 1500) || '[no body]'}
-          ${uniqUrls.length ? `<div style="margin-top:8px;">${uniqUrls.map(u => `<div style="font-size:10px;color:#64748b;margin-bottom:6px;word-break:break-all;">${u}</div>`).join('')}</div>` : ''}
-          <div>${linksHtml}</div>
+        ${bodyClean.slice(0, 1500) || '[no body]'}
+        ${uniqUrls.length ? `<div style="margin-top:8px;">${uniqUrls.map(u => `<div style="font-size:10px;color:#64748b;margin-bottom:6px;word-break:break-all;">${u}</div>`).join('')}</div>` : ''}
+        <div>${linksHtml}</div>
         `;
 
         bodyEl.querySelectorAll('.tm-link-btn').forEach(btn => {
@@ -1944,11 +2143,11 @@ document.getElementById('tmGenRandom').addEventListener('click', async (e) => {
 
     tmSetEmail(address, pass, token);
     tmMsg('ok',
-      `<i class="fa-solid fa-circle-check"></i> <b>Email random dibuat!</b><br>
-       📧 <code>${address}</code>`);
+          `<i class="fa-solid fa-circle-check"></i> <b>Email random dibuat!</b><br>
+          📧 <code>${address}</code>`);
   } catch (err) {
     tmMsg('fail',
-      `<i class="fa-solid fa-circle-xmark"></i> Error: ${err.message}`);
+          `<i class="fa-solid fa-circle-xmark"></i> Error: ${err.message}`);
   } finally {
     btn.disabled = false;
     btn.innerHTML = orig;
@@ -1963,7 +2162,7 @@ document.getElementById('tmGenCustom').addEventListener('click', async (e) => {
 
   if (!name || !/^[a-z0-9._-]{3,}$/.test(name)) {
     tmMsg('fail',
-      '<i class="fa-solid fa-triangle-exclamation"></i> Nama minimal 3 karakter, cuma boleh huruf/angka/titik/underscore/minus!');
+          '<i class="fa-solid fa-triangle-exclamation"></i> Nama minimal 3 karakter, cuma boleh huruf/angka/titik/underscore/minus!');
     return;
   }
 
@@ -1989,11 +2188,11 @@ document.getElementById('tmGenCustom').addEventListener('click', async (e) => {
     tmSaveState();
 
     tmMsg('ok',
-      `<i class="fa-solid fa-circle-check"></i> <b>Email custom siap!</b><br>
-       📧 <code>${address}</code>`);
+          `<i class="fa-solid fa-circle-check"></i> <b>Email custom siap!</b><br>
+          📧 <code>${address}</code>`);
   } catch (err) {
     tmMsg('fail',
-      `<i class="fa-solid fa-circle-xmark"></i> Error: ${err.message}`);
+          `<i class="fa-solid fa-circle-xmark"></i> Error: ${err.message}`);
   } finally {
     btn.disabled = false;
     btn.innerHTML = orig;
@@ -2003,7 +2202,7 @@ document.getElementById('tmGenCustom').addEventListener('click', async (e) => {
 tmRefresh.addEventListener('click', async () => {
   if (!tmCurrentEmail) {
     tmMsg('fail',
-      '<i class="fa-solid fa-triangle-exclamation"></i> Generate email dulu!');
+          '<i class="fa-solid fa-triangle-exclamation"></i> Generate email dulu!');
     return;
   }
   tmRefresh.disabled = true;
@@ -2026,7 +2225,7 @@ tmAutoRefresh.addEventListener('change', () => {
   if (tmAutoRefreshOn) {
     if (!tmCurrentEmail) {
       tmMsg('fail',
-        '<i class="fa-solid fa-triangle-exclamation"></i> Generate email dulu baru nyalain Auto Refresh!');
+            '<i class="fa-solid fa-triangle-exclamation"></i> Generate email dulu baru nyalain Auto Refresh!');
       tmAutoRefresh.checked = false;
       tmAutoRefreshOn = false;
       tmAutoWrap.classList.remove('active');
@@ -2034,11 +2233,11 @@ tmAutoRefresh.addEventListener('change', () => {
       return;
     }
     tmMsg('ok',
-      '<i class="fa-solid fa-circle-check"></i> <b>Auto Refresh ON</b><br>Inbox akan refresh tiap 1 menit.');
+          '<i class="fa-solid fa-circle-check"></i> <b>Auto Refresh ON</b><br>Inbox akan refresh tiap 1 menit.');
     startTmPoll();
   } else {
     tmMsg('ok',
-      '<i class="fa-solid fa-circle-check"></i> <b>Auto Refresh OFF</b><br>Klik Refresh manual kalau perlu.');
+          '<i class="fa-solid fa-circle-check"></i> <b>Auto Refresh OFF</b><br>Klik Refresh manual kalau perlu.');
     stopTmPoll();
   }
 });
@@ -2087,11 +2286,11 @@ tmResetBtn.addEventListener('click', () => {
   tmAutoRefreshOn = false;
   tmAutoWrap.classList.remove('active');
   tmInbox.innerHTML = `
-    <div class="tm-empty">
-      <i class="fa-solid fa-envelope"></i>
-      Belum ada pesan masuk.<br>
-      Generate email dulu, lalu pesan akan muncul otomatis.
-    </div>
+  <div class="tm-empty">
+  <i class="fa-solid fa-envelope"></i>
+  Belum ada pesan masuk.<br>
+  Generate email dulu, lalu pesan akan muncul otomatis.
+  </div>
   `;
   tmClearMsg();
   tmMsg('ok', '<i class="fa-solid fa-circle-check"></i> Session direset.');
