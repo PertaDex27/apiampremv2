@@ -215,6 +215,7 @@
   .api-card.api-tiktok { border-color: rgba(255, 0, 229, 0.4); }
   .api-card.api-spotify { border-color: rgba(29, 185, 84, 0.4); }
   .api-card.api-mail { border-color: rgba(0, 255, 157, 0.4); }
+  .api-card.api-youtube { border-color: rgba(255, 0, 0, 0.45); }
   .api-head { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px dashed rgba(0, 240, 255, 0.22); }
   .api-ico { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; overflow: hidden; }
   .api-ico img { width: 100%; height: 100%; object-fit: contain; display: block; padding: 6px; }
@@ -222,6 +223,7 @@
   .api-tiktok .api-ico { background: linear-gradient(135deg, rgba(255, 0, 229, 0.35), rgba(0, 240, 255, 0.35)); border: 1px solid rgba(255, 0, 229, 0.6); }
   .api-spotify .api-ico { background: linear-gradient(135deg, rgba(29, 185, 84, 0.35), rgba(0, 240, 255, 0.35)); border: 1px solid rgba(29, 185, 84, 0.6); }
   .api-mail .api-ico { background: linear-gradient(135deg, rgba(0, 255, 157, 0.35), rgba(0, 240, 255, 0.35)); border: 1px solid rgba(0, 255, 157, 0.6); }
+  .api-youtube .api-ico { background: linear-gradient(135deg, rgba(255, 0, 0, 0.4), rgba(255, 0, 229, 0.3)); border: 1px solid rgba(255, 0, 0, 0.65); }
   .api-title-box { flex: 1; min-width: 0; text-align: left; }
   .api-title { font-size: 14.5px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; background: linear-gradient(90deg, var(--clr-a), var(--clr-b), var(--clr-c)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
   .api-sub { font-size: 10.5px; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; font-family: 'Courier New', monospace; }
@@ -337,6 +339,39 @@
   .yt-dl-progress { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 10px; }
   .yt-dl-progress-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; transition: width 0.15s linear, background 0.25s ease; }
   .yt-dl-progress-text { position: relative; z-index: 1; font-size: 10.5px; font-weight: 900; letter-spacing: 1px; color: #fff; text-shadow: 0 0 6px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,1); }
+
+
+  .yt-sheet { position: fixed; inset: 0; z-index: 120; display: none; align-items: flex-end; justify-content: center; background: rgba(3, 0, 10, 0.72); backdrop-filter: blur(3px); }
+  .yt-sheet.show { display: flex; }
+  .yt-sheet-inner { width: 100%; max-width: 560px; max-height: 88vh; display: flex; flex-direction: column; background: rgba(10, 5, 25, 0.98); border: 1px solid rgba(255, 48, 48, 0.35); border-radius: 20px 20px 0 0; padding: 16px 16px 14px; box-shadow: 0 -10px 34px rgba(0, 0, 0, 0.65); animation: ytUp 0.22s ease; }
+  @keyframes ytUp { from { transform: translateY(26px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .yt-sheet-head { display: flex; gap: 11px; align-items: center; padding-bottom: 12px; border-bottom: 1px dashed rgba(0, 240, 255, 0.22); }
+  .yt-sheet-thumb { width: 78px; aspect-ratio: 16 / 9; border-radius: 9px; object-fit: cover; background: #000; border: 1px solid rgba(255, 48, 48, 0.4); flex-shrink: 0; }
+  .yt-sheet-info { flex: 1; min-width: 0; text-align: left; }
+  .yt-sheet-title { color: #fff; font-size: 12px; font-weight: 800; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; word-break: break-word; }
+  .yt-sheet-sub { color: #94a3b8; font-size: 9.5px; font-family: 'Courier New', monospace; margin-top: 5px; line-height: 1.5; }
+  .yt-sheet-x { width: 33px; height: 33px; flex-shrink: 0; border-radius: 10px; background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; cursor: pointer; font-family: inherit; font-size: 13px; transition: all 0.2s; }
+  .yt-sheet-x:hover { background: rgba(239, 68, 68, 0.14); color: #fff; }
+  .yt-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 12px 0 10px; padding: 4px; background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.18); border-radius: 11px; }
+  .yt-tab { padding: 9px 6px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #64748b; font-family: inherit; font-size: 10.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+  .yt-tab.active { color: #fff; background: linear-gradient(135deg, rgba(255, 0, 229, 0.25), rgba(0, 240, 255, 0.25)); border-color: rgba(255, 48, 48, 0.55); box-shadow: 0 0 10px rgba(255, 48, 48, 0.22); }
+  .yt-tab:hover:not(.active) { color: #cbd5e1; background: rgba(0, 240, 255, 0.05); }
+  .yt-opts { display: flex; flex-direction: column; gap: 7px; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 2px; }
+  .yt-opts::-webkit-scrollbar { width: 5px; }
+  .yt-opts::-webkit-scrollbar-thumb { background: rgba(255, 48, 48, 0.4); border-radius: 3px; }
+  .yt-opt { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border: 1px solid rgba(0, 240, 255, 0.16); border-radius: 11px; background: rgba(0, 240, 255, 0.03); }
+  .yt-opt:hover { border-color: rgba(255, 48, 48, 0.42); background: rgba(255, 48, 48, 0.05); }
+  .yt-opt-info { flex: 1; min-width: 0; text-align: left; }
+  .yt-opt-name { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; color: #fff; font-size: 12px; font-weight: 800; letter-spacing: 0.4px; }
+  .yt-opt-sub { color: #94a3b8; font-size: 9.5px; font-family: 'Courier New', monospace; margin-top: 4px; }
+  .yt-opt-badge { font-size: 8.5px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; padding: 2px 7px; border-radius: 20px; font-family: 'Courier New', monospace; border: 1px solid rgba(0, 255, 157, 0.45); color: #86efac; background: rgba(0, 255, 157, 0.08); }
+  .yt-opt-badge.mute { border-color: rgba(251, 191, 36, 0.45); color: #fcd34d; background: rgba(251, 191, 36, 0.08); }
+  .yt-opt-badge.svfrom { border-color: rgba(255, 0, 229, 0.5); color: #f0abfc; background: rgba(255, 0, 229, 0.08); }
+  .yt-opt-btn { position: relative; overflow: hidden; width: 42px; height: 36px; flex-shrink: 0; border: none; border-radius: 9px; cursor: pointer; color: #fff; font-family: inherit; font-size: 13px; background: linear-gradient(135deg, var(--clr-c), var(--clr-b), var(--clr-a)); box-shadow: 0 0 10px rgba(255, 0, 229, 0.25); transition: transform 0.15s; }
+  .yt-opt-btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .yt-opt-btn:disabled { opacity: 0.75; cursor: not-allowed; }
+  .yt-sheet-note { margin-top: 11px; padding-top: 10px; border-top: 1px dashed rgba(0, 240, 255, 0.18); color: #7dd3fc; font-size: 9.5px; line-height: 1.65; font-family: 'Courier New', monospace; }
+  .yt-sheet-note b { color: #fff; }
   @media (max-width: 520px) {
     .yt-meta { align-items: flex-start; }
     .yt-thumb { width: 96px; }
@@ -428,7 +463,7 @@
 
 <div class="grd-bg"></div>
 
-<div class="top-avatar-wrap" id="avatarCorner" title="Profil">
+<div class="top-avatar-wrap" id="avatarCorner" title="Profile">
   <div class="top-avatar">
     <div class="avatar-inner">
       <img id="uPhoto" src="" alt="" style="display:none;"
@@ -613,6 +648,7 @@
             <div class="sp-name">YouTube DL</div>
             <div class="sp-sub">Auto Detect • Video & Shorts</div>
           </div>
+
           <div class="lbl-row"><i class="fa-solid fa-link"></i> YouTube URL</div>
           <div class="inp-box">
             <i class="fa-brands fa-youtube ico-left"></i>
@@ -620,7 +656,7 @@
           </div>
           <div class="yt-auto-hint" id="ytAutoHint">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
-            Tempel link YouTube. Jenis link akan dideteksi otomatis saat tombol Download ditekan.
+            Tempel link YouTube
           </div>
           <button class="act-btn act-btn-main" id="ytFetch">
             <i class="fa-solid fa-cloud-arrow-down"></i> Download
@@ -760,7 +796,7 @@
 
       <div class="tut-warn" style="margin:0;">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        <div>KALAU ADA KESALAHAN PENULISAN API, SILAHKAN LANGSUNG KE WEBSITE API TERSEBUT UNTUK MELIHAT CARA PENGGUNAAN API TERSEBUT!</div>
+        <div>IF YOU FIND ANY MISTAKE IN THESE API DOCS, PLEASE GO STRAIGHT TO THE OFFICIAL API WEBSITE TO SEE HOW THAT API IS MEANT TO BE USED!</div>
       </div>
 
       <div class="api-card api-am">
@@ -781,11 +817,11 @@
           </div>
           <div class="api-url">/api/am?action=send&apikey={KEY}&email={EMAIL}</div>
           <div class="api-desc">
-            Kirim magic link ke email target. Wajib pakai proxy Worker karena CORS.
-            Parameter: <b>action</b>, <b>apikey</b>, <b>email</b>.
+            Sends a magic link to the target email. The Worker proxy is required because of CORS.
+            Parameters: <b>action</b>, <b>apikey</b>, <b>email</b>.
           </div>
           <button class="api-code-toggle" data-target="code-am-send">
-            <i class="fa-solid fa-chevron-right"></i> Contoh
+            <i class="fa-solid fa-chevron-right"></i> Example
           </button>
           <pre class="api-code" id="code-am-send">const AM_PROXY = 'https://am-web.xyncteamofficial.workers.dev';
 const AM_API   = 'https://restapidhan.vercel.app';
@@ -794,7 +830,7 @@ const AM_KEY   = 'freeapikeydhan26';
 const target = `${AM_API}/api/am` +
   `?action=send` +
   `&apikey=${encodeURIComponent(AM_KEY)}` +
-  `&email=${encodeURIComponent('contoh@gmail.com')}`;
+  `&email=${encodeURIComponent('user@example.com')}`;
 
 const url = `${AM_PROXY}/?target=${encodeURIComponent(target)}`;
 
@@ -812,15 +848,15 @@ console.log(data);</pre>
           </div>
           <div class="api-url">/api/am?action=verif&apikey={KEY}&email={EMAIL}&url={MAGIC_LINK}</div>
           <div class="api-desc">
-            Verifikasi magic link & aktifkan premium. Parameter <b>url</b> harus di-URL-encode.
+            Verifies the magic link and activates premium. The <b>url</b> parameter must be URL-encoded.
           </div>
           <button class="api-code-toggle" data-target="code-am-verif">
-            <i class="fa-solid fa-chevron-right"></i> Contoh
+            <i class="fa-solid fa-chevron-right"></i> Example
           </button>
           <pre class="api-code" id="code-am-verif">const target = `${AM_API}/api/am` +
   `?action=verif` +
   `&apikey=${encodeURIComponent(AM_KEY)}` +
-  `&email=${encodeURIComponent('contoh@gmail.com')}` +
+  `&email=${encodeURIComponent('user@example.com')}` +
   `&url=${encodeURIComponent('https://alight-creative.firebaseapp.com/__/auth/action?...')}`;
 
 const url = `${AM_PROXY}/?target=${encodeURIComponent(target)}`;
@@ -845,13 +881,13 @@ console.log(data);</pre>
           </div>
           <div class="api-url">https://am-web.xyncteamofficial.workers.dev/?target={ENCODED}</div>
           <div class="api-desc">
-            Semua request lewat Worker proxy. Target asli: <b>api-tiktokv2.vercel.app/api/v2/tiktok</b>.
-            Param <b>source</b> opsional: <b>tikwm</b> (default), <b>snaptikapp</b>, <b>snaptikfi</b>.
-            Response header <b>X-Source</b> = sumber yang dipakai, <b>X-HD</b> = <b>direct</b> / <b>fallback</b>.
-            Catatan: SnapTik.app gak ngasih data <b>likes</b> dan <b>audio</b>, jadi di web ini stat Likes disembunyiin kalau sumbernya snaptikapp.
+            Every request goes through the Worker proxy. Real target: <b>api-tiktokv2.vercel.app/api/v2/tiktok</b>.
+            The <b>source</b> param is optional: <b>tikwm</b> (default), <b>snaptikapp</b>, <b>snaptikfi</b>.
+            Response headers: <b>X-Source</b> = source actually used, <b>X-HD</b> = <b>direct</b> / <b>fallback</b>.
+            Note: SnapTik.app does not return <b>likes</b> or <b>audio</b> data, so this site hides the Likes stat whenever the source is snaptikapp.
           </div>
           <button class="api-code-toggle open" data-target="code-tiktok-v2">
-            <i class="fa-solid fa-chevron-right"></i> Contoh
+            <i class="fa-solid fa-chevron-right"></i> Example
           </button>
           <pre class="api-code show" id="code-tiktok-v2">const TT_WORKER = 'https://am-web.xyncteamofficial.workers.dev';
 const TT_API    = 'https://api-tiktokv2.vercel.app/api/v2/tiktok';
@@ -877,13 +913,14 @@ console.log(await post.json());</pre>
 
         <div class="api-item">
           <div class="api-item-name">
-            <span class="api-method get">GET</span> Format Response
+            <span class="api-method get">GET</span> Response Format
           </div>
           <div class="api-desc">
-            Sukses → <b>code: 0</b>. Gagal → <b>status: false</b> + object <b>errors</b> per source.
+            Success → <b>code: 0</b>. Failure → <b>status: false</b> plus an <b>errors</b> object per source.
+            The <b>message</b> value below is returned in Indonesian by the API ("Semua sumber gagal" = all sources failed).
           </div>
           <button class="api-code-toggle" data-target="code-tiktok-v2-res">
-            <i class="fa-solid fa-chevron-right"></i> Contoh
+            <i class="fa-solid fa-chevron-right"></i> Example
           </button>
           <pre class="api-code" id="code-tiktok-v2-res">{
   "code": 0,
@@ -922,13 +959,13 @@ console.log(await post.json());</pre>
 
         <div class="api-item">
           <div class="api-item-name">
-            <span class="api-method get">GET</span> Kode yang dipakai web ini
+            <span class="api-method get">GET</span> Code used by this site
           </div>
           <div class="api-desc">
-            Semua request TikTok lewat Worker proxy. Gak ada request direct ke Vercel.
+            Every TikTok request goes through the Worker proxy. Nothing is sent to Vercel directly.
           </div>
           <button class="api-code-toggle" data-target="code-tiktok-web">
-            <i class="fa-solid fa-chevron-right"></i> Contoh
+            <i class="fa-solid fa-chevron-right"></i> Example
           </button>
           <pre class="api-code" id="code-tiktok-web">const TT_WORKER = 'https://am-web.xyncteamofficial.workers.dev';
 const TT_API    = 'https://api-tiktokv2.vercel.app/api/v2/tiktok';
@@ -973,10 +1010,10 @@ async function fetchTikTok(url) {
           </div>
           <div class="api-url">https://tikwm.com/api/</div>
           <div class="api-desc">
-            Sumber default yang dipakai API v2. Body: <b>url</b>, <b>hd=1</b>.
+            The default upstream used by API v2. Body: <b>url</b>, <b>hd=1</b>.
           </div>
           <button class="api-code-toggle" data-target="code-tikwm">
-            <i class="fa-solid fa-chevron-right"></i> Contoh
+            <i class="fa-solid fa-chevron-right"></i> Example
           </button>
           <pre class="api-code" id="code-tikwm">import axios from 'axios';
 import qs from 'qs';
@@ -1017,12 +1054,12 @@ console.log(response.data);</pre>
           </div>
           <div class="api-url">https://am-web.xyncteamofficial.workers.dev/?target={ENCODED}</div>
           <div class="api-desc">
-            Target asli: <b>api-tiktokv2.vercel.app/api/v2/spotify</b>.
-            Default return <b>metadata only</b>. Tambah param <b>track</b> buat link MP3:
+            Real target: <b>api-tiktokv2.vercel.app/api/v2/spotify</b>.
+            Returns <b>metadata only</b> by default. Add the <b>track</b> param to also get MP3 links:
             <code>1</code> / <code>1,3</code> / <code>all</code>.
           </div>
           <button class="api-code-toggle" data-target="code-sp-meta">
-            <i class="fa-solid fa-chevron-right"></i> Contoh
+            <i class="fa-solid fa-chevron-right"></i> Example
           </button>
           <pre class="api-code" id="code-sp-meta">const SP_WORKER = 'https://am-web.xyncteamofficial.workers.dev';
 const SP_API    = 'https://api-tiktokv2.vercel.app/api/v2/spotify';
@@ -1038,16 +1075,16 @@ console.log(await t.json());</pre>
 
         <div class="api-item">
           <div class="api-item-name">
-            <span class="api-method get">GET</span> Ambil Link Download MP3
+            <span class="api-method get">GET</span> Get MP3 Download Link
           </div>
           <div class="api-url">.../api/v2/spotify?url={URL}&amp;track=1,2</div>
           <div class="api-url">.../api/v2/spotify?q={KEYWORD}&amp;track=all&amp;limit=5</div>
           <div class="api-desc">
-            <b>track</b> pilih nomor track. <b>track=all</b> buat semua (max 100, bisa dibatasi <b>limit</b>).<br>
-            Response kasih <b>download</b> (link langsung) &amp; <b>download_proxy</b> (streaming lewat domain API ini sendiri).
+            <b>track</b> selects specific track numbers. <b>track=all</b> returns everything (max 100, capped by <b>limit</b>).<br>
+            The response gives you <b>download</b> (a direct link) and <b>download_proxy</b> (streamed through this API's own domain).
           </div>
           <button class="api-code-toggle" data-target="code-sp-dl">
-            <i class="fa-solid fa-chevron-right"></i> Contoh
+            <i class="fa-solid fa-chevron-right"></i> Example
           </button>
           <pre class="api-code" id="code-sp-dl">const target = `${SP_API}?url=${encodeURIComponent('https://open.spotify.com/album/xxx')}&track=1`;
 const dl = await fetch(`${SP_WORKER}/?target=${encodeURIComponent(target)}`);
@@ -1062,20 +1099,20 @@ console.log(file.headers.get('Content-Disposition'), file.headers.get('Content-T
 
         <div class="api-item">
           <div class="api-item-name">
-            <span class="api-method get">GET</span> Parameter Lengkap
+            <span class="api-method get">GET</span> Full Parameter List
           </div>
           <div class="api-desc">
-            <b>url</b> — link Spotify (track / album / playlist)<br>
-            <b>q</b> — keyword search (alternatif url)<br>
+            <b>url</b> — Spotify link (track / album / playlist)<br>
+            <b>q</b> — search keyword (alternative to url)<br>
             <b>track</b> — <code>1</code> / <code>1,3</code> / <code>all</code><br>
-            <b>limit</b> — batasi jumlah track (angka)<br>
-            <b>meta</b> — <code>true</code> buat metadata only<br>
-            <b>dl</b> — streaming MP3 lewat domain API ini, isi sama <b>download</b> dari response (+ <b>name</b> buat nama file)<br>
-            <b>token</b> — session_token premium (optional)<br>
-            <b>license</b> — licenseKey adfree (optional)
+            <b>limit</b> — cap the number of tracks (number)<br>
+            <b>meta</b> — <code>true</code> for metadata only<br>
+            <b>dl</b> — streams the MP3 through this API's domain, feed it the <b>download</b> value from the response (+ <b>name</b> for the filename)<br>
+            <b>token</b> — premium session_token (optional)<br>
+            <b>license</b> — adfree licenseKey (optional)
           </div>
           <button class="api-code-toggle" data-target="code-sp-res">
-            <i class="fa-solid fa-chevron-right"></i> Contoh Response
+            <i class="fa-solid fa-chevron-right"></i> Example Response
           </button>
           <pre class="api-code" id="code-sp-res">{
   "status": true,
@@ -1096,20 +1133,20 @@ console.log(file.headers.get('Content-Disposition'), file.headers.get('Content-T
       "url": "https://open.spotify.com/track/1596890022"
     }
   ],
-  "hint": "Tambahkan parameter track=<nomor> ...",
+  "hint": "Tambahkan parameter track=&lt;nomor&gt; ...",
   "copyright": "© XyncTeam 2026"
 }</pre>
         </div>
 
         <div class="api-item">
           <div class="api-item-name">
-            <span class="api-method get">GET</span> Kode yang dipakai web ini
+            <span class="api-method get">GET</span> Code used by this site
           </div>
           <div class="api-desc">
-            Semua request Spotify lewat Worker proxy. Fallback terakhir ke spotsaver.net juga lewat Worker.
+            Every Spotify request goes through the Worker proxy. The last-resort fallback to spotsaver.net also goes through the Worker.
           </div>
           <button class="api-code-toggle" data-target="code-sp-web">
-            <i class="fa-solid fa-chevron-right"></i> Contoh
+            <i class="fa-solid fa-chevron-right"></i> Example
           </button>
           <pre class="api-code" id="code-sp-web">const SP_WORKER   = 'https://am-web.xyncteamofficial.workers.dev';
 const SP_API      = 'https://api-tiktokv2.vercel.app/api/v2/spotify';
@@ -1121,7 +1158,7 @@ async function spFetchJson(params) {
     `${SP_WORKER}/?target=${encodeURIComponent(`${SP_API}?${qs}`)}`,
     `${SP_WORKER}/?target=${encodeURIComponent(SP_FALLBACK + qs)}`
   ];
-  let lastErr = new Error('Gagal konek ke API Spotify 😭');
+  let lastErr = new Error('Failed to reach the Spotify API');
   for (const u of urls) {
     try {
       const res = await fetch(u, { headers: { 'Accept': 'application/json' } });
@@ -1140,6 +1177,423 @@ async function spFetchJson(params) {
         </div>
       </div>
 
+      <div class="api-card api-youtube">
+        <div class="api-head">
+          <div class="api-ico"><i class="fa-brands fa-youtube"></i></div>
+          <div class="api-title-box">
+            <div class="api-title">YouTube Downloader API</div>
+            <div class="api-sub">// api-ytdlv1.xyncteamofficial.workers.dev — v2.2.1 Beta</div>
+          </div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Info &amp; Documentation
+          </div>
+          <div class="api-url">https://api-ytdlv1.xyncteamofficial.workers.dev/</div>
+          <div class="api-desc">
+            Call it with no parameters (or with any unknown parameter) to see the API info:
+            <b>name</b>, <b>version</b>, <b>features</b> and <b>usage</b> for every endpoint.
+            CORS is wide open — <code>access-control-allow-origin: *</code> with <code>GET, HEAD, OPTIONS</code> —
+            so it can be called straight from the browser, <b>no Worker proxy needed</b>.
+            Server regions: <b>ID, US, GB, JP, SG, MY</b> with automatic fallback.
+          </div>
+          <button class="api-code-toggle" data-target="code-yt-info">
+            <i class="fa-solid fa-chevron-right"></i> Example
+          </button>
+          <pre class="api-code" id="code-yt-info">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
+
+const res  = await fetch(YT_DL_API, { cache: 'no-store' });
+const info = await res.json();
+
+console.log(info.name, info.version);
+console.log(info.features.multiRegion);
+console.log(info.features.saveFromFallback);
+console.log(info.features.saveFromDirect);
+console.log(info.usage);</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Auto Metadata (Video / Shorts)
+          </div>
+          <div class="api-url">/?url={YOUTUBE_URL_OR_ID}&type={auto|video|shorts}&region={REGION_CODE}</div>
+          <div class="api-desc">
+            Main endpoint to get title, author, duration, thumbnail and every available format.
+            <b>type</b> is optional (default <b>auto</b> — video/shorts is detected automatically),
+            <b>region</b> is optional to force a region (ID, US, GB, JP, SG, MY).
+            Formats live in <b>data.videos[]</b>, <b>data.audios[]</b> and again merged in <b>data.medias[]</b>.
+            Every item carries <b>itag</b>, <b>quality</b>, <b>extension</b>, <b>fileSize</b>, <b>size</b>,
+            <b>width</b>, <b>height</b>, <b>fps</b>, <b>bitrate</b> and <b>hasAudio</b>.<br>
+            <b>NEW in v2.2.1:</b> if all YouTube <b>client × region</b> combinations fail, the Worker automatically
+            falls back to <b>SaveFrom</b>. Response shape stays the same, but <b>client</b> becomes <code>"SAVEFROM"</code>
+            and <b>source</b> becomes <code>"savefrom-fallback"</code>.
+          </div>
+          <button class="api-code-toggle" data-target="code-yt-meta">
+            <i class="fa-solid fa-chevron-right"></i> Example
+          </button>
+          <pre class="api-code" id="code-yt-meta">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
+
+const auto = await fetch(`${YT_DL_API}?url=${encodeURIComponent('https://www.youtube.com/watch?v=dQw4w9WgXcQ')}`);
+console.log(await auto.json());
+
+const shorts = await fetch(
+  `${YT_DL_API}?region=JP&type=shorts&url=${encodeURIComponent('https://www.youtube.com/shorts/dQw4w9WgXcQ')}`
+);
+console.log(await shorts.json());
+
+await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`);</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Metadata Response Format
+          </div>
+          <div class="api-desc">
+            Success → <b>success: true</b> plus <b>type</b> (<b>video</b> / <b>shorts</b>), <b>client</b> and the <b>region</b> that was used.
+            Note: <b>1080p and above</b> are usually <b>video only</b> (hasAudio: false) and some come as <b>webm</b>.
+            Formats that already include audio: itag <b>18</b> (360p) and friends (<b>hasAudio: true</b>).
+          </div>
+          <button class="api-code-toggle" data-target="code-yt-meta-res">
+            <i class="fa-solid fa-chevron-right"></i> Example
+          </button>
+          <pre class="api-code" id="code-yt-meta-res">{
+  "copyright": "© XyncTeam - 2026",
+  "success": true,
+  "type": "video",
+  "client": "IOS",
+  "region": "GB",
+  "source": "youtube",
+  "data": {
+    "id": "dQw4w9WgXcQ",
+    "sourceUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "title": "Rick Astley - Never Gonna Give You Up (Official Video) ...",
+    "author": "Rick Astley",
+    "duration": 213,
+    "thumbnail": "https://i.ytimg.com/vi/dQw4w9WgXcQ/sddefault.jpg",
+    "videos": [
+      {
+        "id": 1,
+        "itag": "18",
+        "type": "video",
+        "quality": "360p",
+        "format": "360p [.mp4]",
+        "extension": "mp4",
+        "fileSize": null,
+        "size": null,
+        "hasAudio": true,
+        "width": 640,
+        "height": 360,
+        "fps": 25,
+        "bitrate": 444226,
+        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?dl=dQw4w9WgXcQ&itag=18&q=360p&ext=mp4"
+      }
+    ],
+    "audios": [
+      { "itag": "139", "type": "audio", "quality": "50kbps", "format": "50kbps [.m4a]", "extension": "m4a" }
+    ],
+    "medias": [ ]
+  }
+}</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Download Stream by itag
+          </div>
+          <div class="api-url">/?dl={VIDEO_ID}&itag={ITAG}&q={LABEL}&ext={mp4|webm|m4a}</div>
+          <div class="api-desc">
+            The raw download link. The file is streamed straight through with the
+            <b>Content-Disposition</b> header (automatic filename), <b>Content-Length</b>, <b>Content-Range</b>
+            and <b>X-Copyright</b> — those headers are exposed through CORS.
+            <b>Range requests</b> are supported (HTTP <b>206</b>), so download managers and resume work fine.
+            The <b>q</b> parameter is only a label (used for the filename); the real quality is decided by <b>itag</b>.
+          </div>
+          <button class="api-code-toggle" data-target="code-yt-dl">
+            <i class="fa-solid fa-chevron-right"></i> Example
+          </button>
+          <pre class="api-code" id="code-yt-dl">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
+
+const meta  = await (await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`)).json();
+const first = meta.data.videos.find(v => v.hasAudio);
+
+const dlUrl = `${YT_DL_API}?dl=${meta.data.id}` +
+  `&itag=${first.itag}` +
+  `&q=${encodeURIComponent(first.quality)}` +
+  `&ext=${first.extension}`;
+
+const a = document.createElement('a');
+a.href = dlUrl;
+a.download = `${meta.data.title}.${first.extension}`;
+a.click();
+
+const res = await fetch(dlUrl);
+const total = Number(res.headers.get('content-length')) || 0;
+console.log('file size:', total, 'bytes');
+const blob = await res.blob();</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Media Proxy (CORS / expiry workaround)
+          </div>
+          <div class="api-url">/?proxy={URL_ENCODED}</div>
+          <div class="api-desc">
+            Use it to route raw media links (googlevideo.com and friends) so you avoid CORS and can track download progress.
+            Allowed domains: <b>googlevideo.com</b> and <b>youtube.com</b>.
+            Any other domain → <code>{"success":false,"error":"Domain tidak diizinkan"}</code> ("domain not allowed").
+            Note: <b>i.ytimg.com is not allowlisted</b>, so thumbnails are still requested directly.
+          </div>
+          <button class="api-code-toggle" data-target="code-yt-proxy">
+            <i class="fa-solid fa-chevron-right"></i> Example
+          </button>
+          <pre class="api-code" id="code-yt-proxy">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
+
+function ytToProxy(rawUrl) {
+  const host = new URL(rawUrl).hostname.toLowerCase();
+  const allowed = host.endsWith('googlevideo.com') || host === 'youtube.com' || host.endsWith('.youtube.com');
+  return allowed ? `${YT_DL_API}?proxy=${encodeURIComponent(rawUrl)}` : rawUrl;
+}
+
+const meta = await (await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`)).json();
+const pick = meta.data.videos.find(v => v.hasAudio);
+
+const res  = await fetch(ytToProxy(pick.url), { headers: { Range: 'bytes=0-' } });
+const blob = await res.blob();</pre>
+        </div>
+
+        <!-- ====== SAVEFROM SECTION (NEW in v2.2.1) ====== -->
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> SaveFrom Fallback (Automatic)
+          </div>
+          <div class="api-url">/?url={YOUTUBE_URL}</div>
+          <div class="api-desc">
+            When every YouTube <b>client × region</b> combination fails, the Worker automatically falls back to <b>SaveFrom</b>.
+            The response shape stays identical (<b>data.videos[]</b> + <b>data.audios[]</b> + <b>data.medias[]</b>),
+            so the frontend does not need a special branch.<br>
+            Only these fields change:
+            <br>• <b>client</b> → <code>"SAVEFROM"</code>
+            <br>• <b>source</b> → <code>"savefrom-fallback"</code>
+            <br>• <b>fallbackFrom</b> → <code>"youtube"</code>
+            <br>• <b>yt_attempts</b> → log of every failed YouTube attempt
+            <br>• <b>itag</b> becomes <code>sv1</code>, <code>sv2</code>, etc. (not numeric)
+          </div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Force SaveFrom (Direct)
+          </div>
+          <div class="api-url">/?type=svfrom&url={YOUTUBE_URL}</div>
+          <div class="api-desc">
+            Skip YouTube entirely and go straight to SaveFrom. Useful when YouTube is completely down
+            or when you specifically want SaveFrom's format list (sometimes different resolutions / codecs than YouTube native).<br>
+            Response: <b>client: "SAVEFROM"</b>, <b>source: "savefrom"</b> (no <code>-fallback</code> suffix).
+          </div>
+          <button class="api-code-toggle" data-target="code-yt-svfrom">
+            <i class="fa-solid fa-chevron-right"></i> Example
+          </button>
+          <pre class="api-code" id="code-yt-svfrom">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
+
+const forced = await fetch(
+  `${YT_DL_API}?type=svfrom&url=${encodeURIComponent('https://www.youtube.com/watch?v=dQw4w9WgXcQ')}`
+);
+const data = await forced.json();
+console.log(data.client);   // "SAVEFROM"
+console.log(data.source);   // "savefrom"
+console.log(data.data.videos);</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> SaveFrom Download Proxy
+          </div>
+          <div class="api-url">/?svdl=1&vid={VIDEO_ID}&q={QUALITY}&ext={ext}&ct={0|1}&yt={YOUTUBE_URL}</div>
+          <div class="api-desc">
+            Internal endpoint used when <b>source: savefrom</b>. The Worker re-calls the SaveFrom API
+            (avoiding expired URLs), matches the format by <b>q</b> + <b>ext</b> + <b>ct</b>, and then
+            proxies the file straight to the client.<br>
+            <b>ct=1</b> → converter format (Video + Audio merged through <code>du.sf-converter.com</code>).<br>
+            <b>ct=0</b> → direct googlevideo format (video-only or audio-only).<br>
+            The frontend usually does not call this manually — every <b>url</b> in <b>data.videos[]</b> / <b>data.audios[]</b>
+            already carries the query string for this endpoint.
+          </div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> SaveFrom Response Format
+          </div>
+          <div class="api-desc">
+            Response structure is identical to YouTube native so the frontend does not need a special branch.
+            The only differences are <b>client: "SAVEFROM"</b>, <b>source: "savefrom"</b> / <b>"savefrom-fallback"</b>, and
+            <b>itag</b> values of <code>sv1</code>, <code>sv2</code>, etc.
+          </div>
+          <button class="api-code-toggle" data-target="code-yt-svfrom-res">
+            <i class="fa-solid fa-chevron-right"></i> Example
+          </button>
+          <pre class="api-code" id="code-yt-svfrom-res">{
+  "success": true,
+  "type": "video",
+  "client": "SAVEFROM",
+  "region": "ID",
+  "source": "savefrom-fallback",
+  "fallbackFrom": "youtube",
+  "data": {
+    "id": "dQw4w9WgXcQ",
+    "title": "Rick Astley - Never Gonna Give You Up ...",
+    "duration": 213,
+    "thumbnail": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+    "videos": [
+      {
+        "id": 1,
+        "itag": "sv1",
+        "type": "video",
+        "quality": "720p",
+        "extension": "mp4",
+        "hasAudio": true,
+        "height": 720,
+        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?svdl=1&vid=dQw4w9WgXcQ&q=720&ext=mp4&ct=1&yt=https%3A%2F%2F..."
+      },
+      {
+        "id": 2,
+        "itag": "sv2",
+        "type": "video",
+        "quality": "1080p (video only)",
+        "extension": "mp4",
+        "hasAudio": false,
+        "height": 1080,
+        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?svdl=1&vid=dQw4w9WgXcQ&q=1080&ext=mp4&ct=0&yt=https%3A%2F%2F..."
+      }
+    ],
+    "audios": [
+      {
+        "id": 3,
+        "itag": "sv3",
+        "type": "audio",
+        "quality": "131kbps",
+        "extension": "m4a",
+        "hasAudio": true,
+        "bitrate": 131000,
+        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?svdl=1&vid=dQw4w9WgXcQ&q=131&ext=m4a&ct=0&yt=https%3A%2F%2F..."
+      }
+    ]
+  }
+}</pre>
+        </div>
+
+        <!-- ====== END SAVEFROM SECTION ====== -->
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Debug Client &amp; Region
+          </div>
+          <div class="api-url">/?debug=1&video={VIDEO_ID}</div>
+          <div class="api-desc">
+            Handy for checking server health: returns <b>summary</b>, <b>env</b> (visitor data / po-token status,
+            region list, Cloudflare info) and <b>results</b> — the outcome of every
+            client × region combination (ANDROID, IOS, WEB, etc.) together with its OK / error status.
+          </div>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Code used by this site
+          </div>
+          <div class="api-desc">
+            The <b>Downloader → YouTube</b> tab uses <code>?url=</code> to read the real resolution list of the video,
+            then <code>?dl=</code> (the ready-made links inside <b>data.videos[].url</b> / <b>data.audios[].url</b>) to download.
+            No static list like 2160p / 1440p is forced: only formats that actually exist for that video are shown,
+            each with a <b>with audio</b> / <b>no audio</b> badge.<br>
+            If YouTube is completely down, the Worker automatically falls back to SaveFrom — no frontend changes required.
+          </div>
+          <button class="api-code-toggle" data-target="code-yt-web">
+            <i class="fa-solid fa-chevron-right"></i> Example
+          </button>
+          <pre class="api-code" id="code-yt-web">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
+
+async function ytRequestMeta(input) {
+  const params = new URLSearchParams({ url: input });
+  if (/^\/shorts\//.test(new URL(input.includes('://') ? input : `https://${input}`).pathname)) {
+    params.set('type', 'shorts');
+  }
+  const res  = await fetch(`${YT_DL_API}?${params}`, {
+    headers: { 'Accept': 'application/json' },
+    cache: 'no-store'
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || !json.success || !json.data) {
+    throw new Error(json.error || `HTTP ${res.status}`);
+  }
+  return json;
+}
+
+function ytVideoOptions(data) {
+  const byHeight = new Map();
+  const score = v => (v.hasAudio ? 100 : 0) + (v.extension === 'mp4' ? 20 : 0)
+  + Math.min(10, (Number(v.bitrate) || 0) / 1e6);
+  (data.videos || []).forEach(v => {
+    const h = Number(v.height);
+    if (!h) return;
+    const cur = byHeight.get(h);
+    if (!cur || score(v) > score(cur)) byHeight.set(h, v);
+  });
+  return [...byHeight.entries()].sort((a, b) => b[0] - a[0]).map(([h, v]) => ({
+    label: h + 'p' + (Number(v.fps) >= 50 ? '60' : ''),
+    ext: v.extension, itag: v.itag, size: v.fileSize,
+    hasAudio: !!v.hasAudio,
+    url: v.url
+  }));
+}
+
+async function ytDownloadFile(option, btn) {
+  const res   = await fetch(option.url, { redirect: 'follow' });
+  const total = Number(res.headers.get('content-length')) || 0;
+  const name  = (res.headers.get('content-disposition') || '')
+  .match(/filename\*?=(?:UTF-8'')?["']?([^";']+)/i);
+
+  const reader = res.body.getReader();
+  const chunks = [];
+  let got = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    got += value.length;
+    btn.textContent = Math.round((got / total) * 100) + '%';
+  }
+
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(chunks));
+  a.download = name ? decodeURIComponent(name[1]) : `video-${option.label}.${option.ext}`;
+  a.click();
+}
+
+function ytProxyUrl(rawUrl) {
+  return `${YT_DL_API}?proxy=${encodeURIComponent(rawUrl)}`;
+}</pre>
+        </div>
+
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Error Format
+          </div>
+          <div class="api-desc">
+            Every error shares one shape: <code>{ "success": false, "error": "message" }</code>.
+            Messages come back in Indonesian; the common ones and their meaning:<br>
+            <b>"URL atau ID YouTube tidak valid"</b> — invalid YouTube URL or ID<br>
+            <b>"Parameter type harus auto, video, shorts, atau svfrom"</b> — type must be auto, video, shorts, or svfrom<br>
+            <b>"Parameter dl atau itag tidak valid"</b> — dl or itag parameter is invalid<br>
+            <b>"Format tidak tersedia di upstream"</b> — format unavailable upstream (itag expired / not offered in that region)<br>
+            <b>"Domain tidak diizinkan"</b> — domain not allowed (for <code>?proxy=</code>)<br>
+            <b>"SaveFrom error: ..."</b> — SaveFrom API failed (usually rate limit or unrecognized URL format)<br>
+            <b>"Format tidak ditemukan di SaveFrom (mungkin expired)"</b> — no matching q/ext/ct combination in the SaveFrom response
+          </div>
+        </div>
+      </div>
+
       <div class="api-card api-mail">
         <div class="api-head">
           <div class="api-ico"><i class="fa-solid fa-envelope-open-text"></i></div>
@@ -1154,7 +1608,7 @@ async function spFetchJson(params) {
             <span class="api-method get">GET</span> List Domains
           </div>
           <div class="api-url">https://api.mail.tm/domains</div>
-          <div class="api-desc">Dapet list domain aktif. Response pakai key <b>hydra:member</b>.</div>
+          <div class="api-desc">Returns the list of active domains. The payload uses the <b>hydra:member</b> key.</div>
         </div>
 
         <div class="api-item">
@@ -1162,7 +1616,7 @@ async function spFetchJson(params) {
             <span class="api-method post">POST</span> Create Account
           </div>
           <div class="api-url">https://api.mail.tm/accounts</div>
-          <div class="api-desc">Body: <code>{ address, password }</code>. Password minimal 8 karakter.</div>
+          <div class="api-desc">Body: <code>{ address, password }</code>. The password must be at least 8 characters.</div>
         </div>
 
         <div class="api-item">
@@ -1170,7 +1624,7 @@ async function spFetchJson(params) {
             <span class="api-method post">POST</span> Get Token
           </div>
           <div class="api-url">https://api.mail.tm/token</div>
-          <div class="api-desc">Body: <code>{ address, password }</code>. Return <code>{ token, id }</code>.</div>
+          <div class="api-desc">Body: <code>{ address, password }</code>. Returns <code>{ token, id }</code>.</div>
         </div>
 
         <div class="api-item">
@@ -1179,10 +1633,10 @@ async function spFetchJson(params) {
           </div>
           <div class="api-url">https://api.mail.tm/messages</div>
           <div class="api-desc">
-            Header: <code>Authorization: Bearer {token}</code>. Return list di key <b>hydra:member</b>.
+            Header: <code>Authorization: Bearer {token}</code>. The list comes back under the <b>hydra:member</b> key.
           </div>
           <button class="api-code-toggle" data-target="code-mailtm-flow">
-            <i class="fa-solid fa-chevron-right"></i> Contoh Flow Lengkap
+            <i class="fa-solid fa-chevron-right"></i> Full Flow Example
           </button>
           <pre class="api-code" id="code-mailtm-flow">const TM_WORKER = 'https://am-web.xyncteamofficial.workers.dev';
 const TM_API    = 'https://api.mail.tm';
@@ -1226,13 +1680,15 @@ console.log(mData['hydra:member']);</pre>
           </div>
           <div class="api-url">https://api.mail.tm/messages/{id}</div>
           <div class="api-desc">
-            Header: <code>Authorization: Bearer {token}</code>. Return body di <code>html[0]</code> atau <code>text</code>.
+            Header: <code>Authorization: Bearer {token}</code>. The body is returned in <code>html[0]</code> or <code>text</code>.
           </div>
         </div>
       </div>
 
     </div>
   </div>
+
+</div>
 
 <div class="bottom-nav-wrap">
   <div class="bottom-nav">
@@ -1301,7 +1757,7 @@ console.log(mData['hydra:member']);</pre>
   </div>
 </div>
 
-<script src="js/mainDsb.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="js/mainDsb.js"></script>
 
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a418d90079941be6',t:'MTc5MDQ5NDY5NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
