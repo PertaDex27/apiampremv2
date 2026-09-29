@@ -771,15 +771,14 @@ let ytMode  = 'video';
 let ytSheetEl = null;
 
 const YT_SOURCES = {
-  native: {
-    name: 'YouTube',
-    chip: '<i class="fa-brands fa-youtube"></i> YouTube',
-    hint: '<b>YouTube</b> — Download video asli dari yt, video diatas 360-720p tidak memiliki suara (audio terpisah dari sononye).'
+  savefrom: {
+    name: 'SaveFrom',
+    chip: '<i class="fa-brands fa-youtube"></i> SaveFrom',
+    hint: '<b>SaveFrom</b> — resolusi tinggi (video-only) otomatis di-merge dengan audio terbaik pakai ffmpeg.'
   }
 };
 
-let ytSource = localStorage.getItem('yt_source') || 'native';
-if (!(ytSource in YT_SOURCES)) ytSource = 'native';
+let ytSource = 'savefrom';
 
 function ytEsc(value) {
   return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({
@@ -1076,14 +1075,14 @@ function ytRenderOptions() {
 
 
   if (isAudio) {
-    note.innerHTML = `Audio-only asli YouTube (bukan hasil convert MP3). Link <b>dibuat ulang tiap diklik</b>, jadi gak ada masalah expired.`;
+    note.innerHTML = `Audio-only dari SaveFrom. Link <b>dibuat ulang tiap diklik</b>, jadi gak ada masalah expired.`;
     return;
   }
 
   const adaMuxed = opts.some(o => o.badge.cls !== 'mute');
   note.innerHTML = adaMuxed
-  ? `Badge <b>ada suara</b> = 1 file langsung, suara dan video jadi satu. Badge <b>tanpa audio</b> = video-only — biasanya 1080p ke atas; suaranya ambil di tab <b>Audio</b>.`
-  : `<b style="color:#fcd34d">⚠️ Video ini gak nyediain format 1-file bersuara</b> — semua opsi di atas <b>video-only</b>. Kalau butuh suaranya, download videonya di sini + audionya lewat tab <b>Audio</b>.`;
+  ? `Badge <b>ada suara</b> = 1 file langsung dari SaveFrom. Badge <b>tanpa audio</b> = video-only — otomatis di-merge dengan audio terbaik via <b>ffmpeg</b> (butuh waktu lebih lama).`
+  : `<b style="color:#fcd34d">⚠️ Gak ada format bersuara</b> — semua opsi video-only, otomatis di-merge dengan audio terbaik via <b>ffmpeg</b>.`;
 }
 
 async function ytDownloadFile(url, filename, btn) {
@@ -1096,10 +1095,9 @@ async function ytDownloadFile(url, filename, btn) {
       ytMeta = ytNormalizeMeta(fresh);
       const all = [...(ytMeta.data.videos || []), ...(ytMeta.data.audios || [])];
       const same = all.find(x => String(x.itag) === String(btn.dataset.itag));
-      const retryUrl = same && same.url
-      ? same.url
-      : `${YT_DL_API}?dl=${encodeURIComponent(ytMeta.data.id)}&itag=${encodeURIComponent(btn.dataset.itag)}&q=${encodeURIComponent(btn.dataset.quality || btn.dataset.label)}&ext=${encodeURIComponent(btn.dataset.ext)}`;
-      res = await fetch(retryUrl, { method: 'GET', redirect: 'follow' });
+      if (same && same.url) {
+        res = await fetch(same.url, { method: 'GET', redirect: 'follow' });
+      }
     }
   }
 
@@ -1197,12 +1195,6 @@ async function ytRequestMeta(input) {
   }
   return json;
 }
-
-
-
-
-
-
 
 function ytNormalizeMeta(json) {
   return {
