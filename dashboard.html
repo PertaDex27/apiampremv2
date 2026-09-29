@@ -646,7 +646,7 @@
           <div class="sp-header">
             <div class="sp-logo"><i class="fa-brands fa-youtube"></i></div>
             <div class="sp-name">YouTube DL</div>
-            <div class="sp-sub">SaveFrom • Auto Merge via Converter</div>
+            <div class="sp-sub">SaveFrom • Video &amp; Audio</div>
           </div>
 
           <div class="lbl-row"><i class="fa-solid fa-link"></i> YouTube URL</div>
@@ -1182,7 +1182,7 @@ async function spFetchJson(params) {
           <div class="api-ico"><i class="fa-brands fa-youtube"></i></div>
           <div class="api-title-box">
             <div class="api-title">YouTube Downloader API</div>
-            <div class="api-sub">// api-ytdlv1.xyncteamofficial.workers.dev — v3.1.1</div>
+            <div class="api-sub">// api-ytdlv1.xyncteamofficial.workers.dev — v3.1.2</div>
           </div>
         </div>
 
@@ -1196,8 +1196,7 @@ async function spFetchJson(params) {
             <b>name</b>, <b>version</b>, <b>features</b> and <b>usage</b> for every endpoint.
             CORS is wide open — <code>access-control-allow-origin: *</code> with <code>GET, HEAD, OPTIONS</code> —
             so it can be called straight from the browser, <b>no Worker proxy needed</b>.
-            Source is <b>SaveFrom only</b> — every download goes through SaveFrom, and video-only formats are
-            merged with the best available audio track via the <b>SaveFrom Converter</b> (ct=1 format).
+            Source is <b>SaveFrom only</b> — every download goes through SaveFrom.
           </div>
           <button class="api-code-toggle" data-target="code-yt-info">
             <i class="fa-solid fa-chevron-right"></i> Example
@@ -1209,7 +1208,6 @@ const info = await res.json();
 
 console.log(info.name, info.version);
 console.log(info.features.source);
-console.log(info.features.merge);
 console.log(info.usage);</pre>
         </div>
 
@@ -1223,9 +1221,7 @@ console.log(info.usage);</pre>
             <b>type</b> is optional (default <b>auto</b> — video/shorts is detected automatically).
             Formats live in <b>data.videos[]</b>, <b>data.audios[]</b> and again merged in <b>data.medias[]</b>.
             Every item carries <b>itag</b> (<code>sv1</code>, <code>sv2</code>, ...), <b>quality</b>, <b>extension</b>,
-            <b>hasAudio</b>, <b>height</b>, <b>bitrate</b>, and a ready-to-use <b>url</b> pointing at the download endpoint.<br>
-            <b>Video-only</b> entries automatically get <b>merge=1</b> in their <b>url</b> (when SaveFrom returns at least one audio format),
-            so the frontend does not need any special branch.
+            <b>hasAudio</b>, <b>height</b>, <b>bitrate</b>, and a ready-to-use <b>url</b> pointing at the download endpoint.
           </div>
           <button class="api-code-toggle" data-target="code-yt-meta">
             <i class="fa-solid fa-chevron-right"></i> Example
@@ -1287,11 +1283,11 @@ await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`);</pre>
       {
         "id": 2,
         "itag": "sv2",
-        "type": "video-only",
-        "quality": "1080p",
+        "type": "video",
+        "quality": "1080p (video only)",
         "hasAudio": false,
         "height": 1080,
-        "url": "...&merge=1"
+        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?svdl=1&vid=dQw4w9WgXcQ&q=1080&ext=mp4&ct=0&yt=..."
       }
     ],
     "audios": [
@@ -1302,7 +1298,7 @@ await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`);</pre>
         "quality": "131kbps",
         "extension": "m4a",
         "hasAudio": true,
-        "url": "...&q=131&ext=m4a&ct=0&yt=..."
+        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?svdl=1&vid=dQw4w9WgXcQ&q=131&ext=m4a&ct=0&yt=..."
       }
     ],
     "medias": [ ]
@@ -1318,7 +1314,7 @@ await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`);</pre>
           <div class="api-desc">
             The raw download link. Every <b>url</b> inside <b>data.videos[]</b> / <b>data.audios[]</b>
             already carries this query string, so you never build it manually.<br>
-            <b>ct=1</b> → SaveFrom converter format (video + audio already merged).<br>
+            <b>ct=1</b> → SaveFrom converter format.<br>
             <b>ct=0</b> → direct googlevideo format (video-only or audio-only).<br>
             Response includes <b>Content-Disposition</b> (auto filename), <b>Content-Length</b>, <b>Content-Range</b>
             and <b>X-Copyright</b>. Those headers are exposed through CORS.
@@ -1343,31 +1339,12 @@ console.log('file size:', res.headers.get('content-length'), 'bytes');</pre>
 
         <div class="api-item">
           <div class="api-item-name">
-            <span class="api-method get">GET</span> Auto Merge (SaveFrom Converter)
-          </div>
-          <div class="api-url">/?svdl=1&vid=...&q=...&ext=mp4&ct=0&yt=...&merge=1</div>
-          <div class="api-desc">
-            When a video-only format is requested <b>without a Range header</b> (and the request is not HEAD),
-            the Worker looks for the closest matching <b>ct=1</b> format at the same quality (or the highest
-            quality below it), hands it to the <b>SaveFrom Converter</b>, waits for the task to finish, and
-            streams the merged file back to the client. The metadata endpoint adds <b>merge=1</b> automatically
-            for every video-only entry (when SaveFrom returns at least one audio format), so the frontend does
-            not need a special branch.<br>
-            Response header <b>X-Source</b> becomes <code>savefrom-converter</code>.
-            Merging needs more time — expect <b>10-40 seconds</b> depending on video length.
-            If no matching ct=1 format exists, the Worker silently falls back to streaming the raw
-            video-only file so the user still gets <b>something</b>.
-          </div>
-        </div>
-
-        <div class="api-item">
-          <div class="api-item-name">
             <span class="api-method get">GET</span> Code used by this site
           </div>
           <div class="api-desc">
             The <b>Downloader → YouTube</b> tab calls <code>?url=</code> to read the real format list,
             then downloads using each item's ready-made <b>url</b> (which is a <code>?svdl=</code> link).
-            Video-only items hit the auto-merge path; audio items stream separately.
+            Video-only items show badge <b>"tanpa audio"</b> — audio must be downloaded separately from the Audio tab.
             If a format URL is expired (403/404/410/502/503), the frontend re-fetches metadata and retries with the refreshed URL.
           </div>
           <button class="api-code-toggle" data-target="code-yt-web">
@@ -1444,7 +1421,6 @@ async function ytDownloadFile(option, btn) {
             <b>"Parameter yt wajib diisi"</b> — yt parameter required on <code>?svdl=</code><br>
             <b>"SaveFrom error: ..."</b> — SaveFrom API failed (rate limit or unrecognized URL)<br>
             <b>"Format tidak ditemukan di SaveFrom (mungkin expired)"</b> — no matching q/ext/ct combination in the SaveFrom response<br>
-            <b>"Merge via converter gagal: ..."</b> — SaveFrom Converter task failed or timed out<br>
             <b>"Download gagal: ..."</b> — stream fetch failed (upstream rejected or timed out)
           </div>
         </div>
