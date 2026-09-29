@@ -774,7 +774,7 @@ const YT_SOURCES = {
   savefrom: {
     name: 'SaveFrom',
     chip: '<i class="fa-brands fa-youtube"></i> SaveFrom',
-    hint: '<b>SaveFrom</b> — resolusi tinggi (video-only) otomatis di-merge dengan audio terbaik pakai ffmpeg.'
+    hint: '<b>SaveFrom</b> — resolusi tinggi (video-only) otomatis di-merge dengan audio terbaik lewat SaveFrom Converter.'
   }
 };
 
@@ -1081,8 +1081,8 @@ function ytRenderOptions() {
 
   const adaMuxed = opts.some(o => o.badge.cls !== 'mute');
   note.innerHTML = adaMuxed
-  ? `Badge <b>ada suara</b> = 1 file langsung dari SaveFrom. Badge <b>tanpa audio</b> = video-only — otomatis di-merge dengan audio terbaik via <b>ffmpeg</b> (butuh waktu lebih lama).`
-  : `<b style="color:#fcd34d">⚠️ Gak ada format bersuara</b> — semua opsi video-only, otomatis di-merge dengan audio terbaik via <b>ffmpeg</b>.`;
+  ? `Badge <b>ada suara</b> = 1 file langsung dari SaveFrom. Badge <b>tanpa audio</b> = video-only — otomatis di-merge dengan audio terbaik via <b>SaveFrom Converter</b> (butuh waktu lebih lama).`
+  : `<b style="color:#fcd34d">⚠️ Gak ada format bersuara</b> — semua opsi video-only, otomatis di-merge dengan audio terbaik via <b>SaveFrom Converter</b>.`;
 }
 
 async function ytDownloadFile(url, filename, btn) {

@@ -646,7 +646,7 @@
           <div class="sp-header">
             <div class="sp-logo"><i class="fa-brands fa-youtube"></i></div>
             <div class="sp-name">YouTube DL</div>
-            <div class="sp-sub">Auto Detect • Video & Shorts</div>
+            <div class="sp-sub">SaveFrom • Auto Merge via ffmpeg</div>
           </div>
 
           <div class="lbl-row"><i class="fa-solid fa-link"></i> YouTube URL</div>
@@ -1182,7 +1182,7 @@ async function spFetchJson(params) {
           <div class="api-ico"><i class="fa-brands fa-youtube"></i></div>
           <div class="api-title-box">
             <div class="api-title">YouTube Downloader API</div>
-            <div class="api-sub">// api-ytdlv1.xyncteamofficial.workers.dev — v2.2.1 Beta</div>
+            <div class="api-sub">// api-ytdlv1.xyncteamofficial.workers.dev — v3.0.0</div>
           </div>
         </div>
 
@@ -1196,7 +1196,8 @@ async function spFetchJson(params) {
             <b>name</b>, <b>version</b>, <b>features</b> and <b>usage</b> for every endpoint.
             CORS is wide open — <code>access-control-allow-origin: *</code> with <code>GET, HEAD, OPTIONS</code> —
             so it can be called straight from the browser, <b>no Worker proxy needed</b>.
-            Server regions: <b>ID, US, GB, JP, SG, MY</b> with automatic fallback.
+            Source is <b>SaveFrom only</b> — every download goes through SaveFrom, and video-only formats are
+            merged with the best available audio track via <b>ffmpeg.wasm</b>.
           </div>
           <button class="api-code-toggle" data-target="code-yt-info">
             <i class="fa-solid fa-chevron-right"></i> Example
@@ -1207,38 +1208,37 @@ const res  = await fetch(YT_DL_API, { cache: 'no-store' });
 const info = await res.json();
 
 console.log(info.name, info.version);
-console.log(info.features.multiRegion);
-console.log(info.features.saveFromFallback);
-console.log(info.features.saveFromDirect);
+console.log(info.features.source);
+console.log(info.features.merge);
 console.log(info.usage);</pre>
         </div>
 
         <div class="api-item">
           <div class="api-item-name">
-            <span class="api-method get">GET</span> Auto Metadata (Video / Shorts)
+            <span class="api-method get">GET</span> Metadata (Video / Shorts)
           </div>
-          <div class="api-url">/?url={YOUTUBE_URL_OR_ID}&type={auto|video|shorts}&region={REGION_CODE}</div>
+          <div class="api-url">/?url={YOUTUBE_URL_OR_ID}&type={auto|video|shorts}</div>
           <div class="api-desc">
-            Main endpoint to get title, author, duration, thumbnail and every available format.
-            <b>type</b> is optional (default <b>auto</b> — video/shorts is detected automatically),
-            <b>region</b> is optional to force a region (ID, US, GB, JP, SG, MY).
+            Main endpoint — title, duration, thumbnail and every format available from <b>SaveFrom</b>.
+            <b>type</b> is optional (default <b>auto</b> — video/shorts is detected automatically).
             Formats live in <b>data.videos[]</b>, <b>data.audios[]</b> and again merged in <b>data.medias[]</b>.
-            Every item carries <b>itag</b>, <b>quality</b>, <b>extension</b>, <b>fileSize</b>, <b>size</b>,
-            <b>width</b>, <b>height</b>, <b>fps</b>, <b>bitrate</b> and <b>hasAudio</b>.<br>
-            <b>NEW in v2.2.1:</b> if all YouTube <b>client × region</b> combinations fail, the Worker automatically
-            falls back to <b>SaveFrom</b>. Response shape stays the same, but <b>client</b> becomes <code>"SAVEFROM"</code>
-            and <b>source</b> becomes <code>"savefrom-fallback"</code>.
+            Every item carries <b>itag</b> (<code>sv1</code>, <code>sv2</code>, ...), <b>quality</b>, <b>extension</b>,
+            <b>hasAudio</b>, <b>height</b>, <b>bitrate</b>, and a ready-to-use <b>url</b> pointing at the download endpoint.<br>
+            <b>Video-only</b> entries automatically get <b>merge=1</b> in their <b>url</b> (when SaveFrom returns at least one audio format),
+            so the frontend does not need any special branch.
           </div>
           <button class="api-code-toggle" data-target="code-yt-meta">
             <i class="fa-solid fa-chevron-right"></i> Example
           </button>
           <pre class="api-code" id="code-yt-meta">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
 
-const auto = await fetch(`${YT_DL_API}?url=${encodeURIComponent('https://www.youtube.com/watch?v=dQw4w9WgXcQ')}`);
+const auto = await fetch(
+  `${YT_DL_API}?url=${encodeURIComponent('https://www.youtube.com/watch?v=dQw4w9WgXcQ')}`
+);
 console.log(await auto.json());
 
 const shorts = await fetch(
-  `${YT_DL_API}?region=JP&type=shorts&url=${encodeURIComponent('https://www.youtube.com/shorts/dQw4w9WgXcQ')}`
+  `${YT_DL_API}?type=shorts&url=${encodeURIComponent('https://www.youtube.com/shorts/dQw4w9WgXcQ')}`
 );
 console.log(await shorts.json());
 
@@ -1250,9 +1250,10 @@ await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`);</pre>
             <span class="api-method get">GET</span> Metadata Response Format
           </div>
           <div class="api-desc">
-            Success → <b>success: true</b> plus <b>type</b> (<b>video</b> / <b>shorts</b>), <b>client</b> and the <b>region</b> that was used.
-            Note: <b>1080p and above</b> are usually <b>video only</b> (hasAudio: false) and some come as <b>webm</b>.
-            Formats that already include audio: itag <b>18</b> (360p) and friends (<b>hasAudio: true</b>).
+            Success → <b>success: true</b>, <b>type</b> (<b>video</b> / <b>shorts</b>),
+            <b>client: "SAVEFROM"</b>, <b>region: "ID"</b>, <b>source: "savefrom"</b>.
+            Every <b>url</b> inside <b>data.videos[]</b> / <b>data.audios[]</b> is a ready-to-use download link —
+            do <b>not</b> build the query string yourself.
           </div>
           <button class="api-code-toggle" data-target="code-yt-meta-res">
             <i class="fa-solid fa-chevron-right"></i> Example
@@ -1261,189 +1262,14 @@ await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`);</pre>
   "copyright": "© XyncTeam - 2026",
   "success": true,
   "type": "video",
-  "client": "IOS",
-  "region": "GB",
-  "source": "youtube",
+  "client": "SAVEFROM",
+  "region": "ID",
+  "source": "savefrom",
   "data": {
     "id": "dQw4w9WgXcQ",
     "sourceUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    "title": "Rick Astley - Never Gonna Give You Up (Official Video) ...",
-    "author": "Rick Astley",
-    "duration": 213,
-    "thumbnail": "https://i.ytimg.com/vi/dQw4w9WgXcQ/sddefault.jpg",
-    "videos": [
-      {
-        "id": 1,
-        "itag": "18",
-        "type": "video",
-        "quality": "360p",
-        "format": "360p [.mp4]",
-        "extension": "mp4",
-        "fileSize": null,
-        "size": null,
-        "hasAudio": true,
-        "width": 640,
-        "height": 360,
-        "fps": 25,
-        "bitrate": 444226,
-        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?dl=dQw4w9WgXcQ&itag=18&q=360p&ext=mp4"
-      }
-    ],
-    "audios": [
-      { "itag": "139", "type": "audio", "quality": "50kbps", "format": "50kbps [.m4a]", "extension": "m4a" }
-    ],
-    "medias": [ ]
-  }
-}</pre>
-        </div>
-
-        <div class="api-item">
-          <div class="api-item-name">
-            <span class="api-method get">GET</span> Download Stream by itag
-          </div>
-          <div class="api-url">/?dl={VIDEO_ID}&itag={ITAG}&q={LABEL}&ext={mp4|webm|m4a}</div>
-          <div class="api-desc">
-            The raw download link. The file is streamed straight through with the
-            <b>Content-Disposition</b> header (automatic filename), <b>Content-Length</b>, <b>Content-Range</b>
-            and <b>X-Copyright</b> — those headers are exposed through CORS.
-            <b>Range requests</b> are supported (HTTP <b>206</b>), so download managers and resume work fine.
-            The <b>q</b> parameter is only a label (used for the filename); the real quality is decided by <b>itag</b>.
-          </div>
-          <button class="api-code-toggle" data-target="code-yt-dl">
-            <i class="fa-solid fa-chevron-right"></i> Example
-          </button>
-          <pre class="api-code" id="code-yt-dl">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
-
-const meta  = await (await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`)).json();
-const first = meta.data.videos.find(v => v.hasAudio);
-
-const dlUrl = `${YT_DL_API}?dl=${meta.data.id}` +
-  `&itag=${first.itag}` +
-  `&q=${encodeURIComponent(first.quality)}` +
-  `&ext=${first.extension}`;
-
-const a = document.createElement('a');
-a.href = dlUrl;
-a.download = `${meta.data.title}.${first.extension}`;
-a.click();
-
-const res = await fetch(dlUrl);
-const total = Number(res.headers.get('content-length')) || 0;
-console.log('file size:', total, 'bytes');
-const blob = await res.blob();</pre>
-        </div>
-
-        <div class="api-item">
-          <div class="api-item-name">
-            <span class="api-method get">GET</span> Media Proxy (CORS / expiry workaround)
-          </div>
-          <div class="api-url">/?proxy={URL_ENCODED}</div>
-          <div class="api-desc">
-            Use it to route raw media links (googlevideo.com and friends) so you avoid CORS and can track download progress.
-            Allowed domains: <b>googlevideo.com</b> and <b>youtube.com</b>.
-            Any other domain → <code>{"success":false,"error":"Domain tidak diizinkan"}</code> ("domain not allowed").
-            Note: <b>i.ytimg.com is not allowlisted</b>, so thumbnails are still requested directly.
-          </div>
-          <button class="api-code-toggle" data-target="code-yt-proxy">
-            <i class="fa-solid fa-chevron-right"></i> Example
-          </button>
-          <pre class="api-code" id="code-yt-proxy">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
-
-function ytToProxy(rawUrl) {
-  const host = new URL(rawUrl).hostname.toLowerCase();
-  const allowed = host.endsWith('googlevideo.com') || host === 'youtube.com' || host.endsWith('.youtube.com');
-  return allowed ? `${YT_DL_API}?proxy=${encodeURIComponent(rawUrl)}` : rawUrl;
-}
-
-const meta = await (await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`)).json();
-const pick = meta.data.videos.find(v => v.hasAudio);
-
-const res  = await fetch(ytToProxy(pick.url), { headers: { Range: 'bytes=0-' } });
-const blob = await res.blob();</pre>
-        </div>
-
-        <!-- ====== SAVEFROM SECTION (NEW in v2.2.1) ====== -->
-
-        <div class="api-item">
-          <div class="api-item-name">
-            <span class="api-method get">GET</span> SaveFrom Fallback (Automatic)
-          </div>
-          <div class="api-url">/?url={YOUTUBE_URL}</div>
-          <div class="api-desc">
-            When every YouTube <b>client × region</b> combination fails, the Worker automatically falls back to <b>SaveFrom</b>.
-            The response shape stays identical (<b>data.videos[]</b> + <b>data.audios[]</b> + <b>data.medias[]</b>),
-            so the frontend does not need a special branch.<br>
-            Only these fields change:
-            <br>• <b>client</b> → <code>"SAVEFROM"</code>
-            <br>• <b>source</b> → <code>"savefrom-fallback"</code>
-            <br>• <b>fallbackFrom</b> → <code>"youtube"</code>
-            <br>• <b>yt_attempts</b> → log of every failed YouTube attempt
-            <br>• <b>itag</b> becomes <code>sv1</code>, <code>sv2</code>, etc. (not numeric)
-          </div>
-        </div>
-
-        <div class="api-item">
-          <div class="api-item-name">
-            <span class="api-method get">GET</span> Force SaveFrom (Direct)
-          </div>
-          <div class="api-url">/?type=svfrom&url={YOUTUBE_URL}</div>
-          <div class="api-desc">
-            Skip YouTube entirely and go straight to SaveFrom. Useful when YouTube is completely down
-            or when you specifically want SaveFrom's format list (sometimes different resolutions / codecs than YouTube native).<br>
-            Response: <b>client: "SAVEFROM"</b>, <b>source: "savefrom"</b> (no <code>-fallback</code> suffix).
-          </div>
-          <button class="api-code-toggle" data-target="code-yt-svfrom">
-            <i class="fa-solid fa-chevron-right"></i> Example
-          </button>
-          <pre class="api-code" id="code-yt-svfrom">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
-
-const forced = await fetch(
-  `${YT_DL_API}?type=svfrom&url=${encodeURIComponent('https://www.youtube.com/watch?v=dQw4w9WgXcQ')}`
-);
-const data = await forced.json();
-console.log(data.client);   // "SAVEFROM"
-console.log(data.source);   // "savefrom"
-console.log(data.data.videos);</pre>
-        </div>
-
-        <div class="api-item">
-          <div class="api-item-name">
-            <span class="api-method get">GET</span> SaveFrom Download Proxy
-          </div>
-          <div class="api-url">/?svdl=1&vid={VIDEO_ID}&q={QUALITY}&ext={ext}&ct={0|1}&yt={YOUTUBE_URL}</div>
-          <div class="api-desc">
-            Internal endpoint used when <b>source: savefrom</b>. The Worker re-calls the SaveFrom API
-            (avoiding expired URLs), matches the format by <b>q</b> + <b>ext</b> + <b>ct</b>, and then
-            proxies the file straight to the client.<br>
-            <b>ct=1</b> → converter format (Video + Audio merged through <code>du.sf-converter.com</code>).<br>
-            <b>ct=0</b> → direct googlevideo format (video-only or audio-only).<br>
-            The frontend usually does not call this manually — every <b>url</b> in <b>data.videos[]</b> / <b>data.audios[]</b>
-            already carries the query string for this endpoint.
-          </div>
-        </div>
-
-        <div class="api-item">
-          <div class="api-item-name">
-            <span class="api-method get">GET</span> SaveFrom Response Format
-          </div>
-          <div class="api-desc">
-            Response structure is identical to YouTube native so the frontend does not need a special branch.
-            The only differences are <b>client: "SAVEFROM"</b>, <b>source: "savefrom"</b> / <b>"savefrom-fallback"</b>, and
-            <b>itag</b> values of <code>sv1</code>, <code>sv2</code>, etc.
-          </div>
-          <button class="api-code-toggle" data-target="code-yt-svfrom-res">
-            <i class="fa-solid fa-chevron-right"></i> Example
-          </button>
-          <pre class="api-code" id="code-yt-svfrom-res">{
-  "success": true,
-  "type": "video",
-  "client": "SAVEFROM",
-  "region": "ID",
-  "source": "savefrom-fallback",
-  "fallbackFrom": "youtube",
-  "data": {
-    "id": "dQw4w9WgXcQ",
     "title": "Rick Astley - Never Gonna Give You Up ...",
+    "author": null,
     "duration": 213,
     "thumbnail": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
     "videos": [
@@ -1452,20 +1278,20 @@ console.log(data.data.videos);</pre>
         "itag": "sv1",
         "type": "video",
         "quality": "720p",
+        "format": "720p [.mp4]",
         "extension": "mp4",
         "hasAudio": true,
         "height": 720,
-        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?svdl=1&vid=dQw4w9WgXcQ&q=720&ext=mp4&ct=1&yt=https%3A%2F%2F..."
+        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?svdl=1&vid=dQw4w9WgXcQ&q=720&ext=mp4&ct=1&yt=..."
       },
       {
         "id": 2,
         "itag": "sv2",
         "type": "video",
         "quality": "1080p (video only)",
-        "extension": "mp4",
         "hasAudio": false,
         "height": 1080,
-        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?svdl=1&vid=dQw4w9WgXcQ&q=1080&ext=mp4&ct=0&yt=https%3A%2F%2F..."
+        "url": "...&merge=1&aq=131&aext=m4a"
       }
     ],
     "audios": [
@@ -1476,25 +1302,59 @@ console.log(data.data.videos);</pre>
         "quality": "131kbps",
         "extension": "m4a",
         "hasAudio": true,
-        "bitrate": 131000,
-        "url": "https://api-ytdlv1.xyncteamofficial.workers.dev/?svdl=1&vid=dQw4w9WgXcQ&q=131&ext=m4a&ct=0&yt=https%3A%2F%2F..."
+        "url": "...&q=131&ext=m4a&ct=0&yt=..."
       }
-    ]
+    ],
+    "medias": [ ]
   }
 }</pre>
         </div>
 
-        <!-- ====== END SAVEFROM SECTION ====== -->
+        <div class="api-item">
+          <div class="api-item-name">
+            <span class="api-method get">GET</span> Download Stream
+          </div>
+          <div class="api-url">/?svdl=1&vid={VIDEO_ID}&q={QUALITY}&ext={mp4|m4a|webm}&ct={0|1}&yt={YOUTUBE_URL}</div>
+          <div class="api-desc">
+            The raw download link. Every <b>url</b> inside <b>data.videos[]</b> / <b>data.audios[]</b>
+            already carries this query string, so you never build it manually.<br>
+            <b>ct=1</b> → SaveFrom converter format (video + audio already merged).<br>
+            <b>ct=0</b> → direct googlevideo format (video-only or audio-only).<br>
+            Response includes <b>Content-Disposition</b> (auto filename), <b>Content-Length</b>, <b>Content-Range</b>
+            and <b>X-Copyright</b>. Those headers are exposed through CORS.
+            <b>Range requests</b> are supported (HTTP <b>206</b>), so download managers and resume work fine.
+          </div>
+          <button class="api-code-toggle" data-target="code-yt-dl">
+            <i class="fa-solid fa-chevron-right"></i> Example
+          </button>
+          <pre class="api-code" id="code-yt-dl">const YT_DL_API = 'https://api-ytdlv1.xyncteamofficial.workers.dev';
+
+const meta  = await (await fetch(`${YT_DL_API}?url=dQw4w9WgXcQ`)).json();
+const first = meta.data.videos[0];
+
+const a = document.createElement('a');
+a.href = first.url;
+a.download = `${meta.data.title}.${first.extension}`;
+a.click();
+
+const res = await fetch(first.url);
+console.log('file size:', res.headers.get('content-length'), 'bytes');</pre>
+        </div>
 
         <div class="api-item">
           <div class="api-item-name">
-            <span class="api-method get">GET</span> Debug Client &amp; Region
+            <span class="api-method get">GET</span> Auto Merge (ffmpeg.wasm)
           </div>
-          <div class="api-url">/?debug=1&video={VIDEO_ID}</div>
+          <div class="api-url">/?svdl=1&vid=...&q=...&ext=mp4&ct=0&yt=...&merge=1&aq={AUDIO_Q}&aext={AUDIO_EXT}</div>
           <div class="api-desc">
-            Handy for checking server health: returns <b>summary</b>, <b>env</b> (visitor data / po-token status,
-            region list, Cloudflare info) and <b>results</b> — the outcome of every
-            client × region combination (ANDROID, IOS, WEB, etc.) together with its OK / error status.
+            When a video-only format is requested <b>without a Range header</b> (and the request is not HEAD),
+            the Worker fetches the best audio track, merges both via <b>ffmpeg.wasm</b>, and returns a single
+            <b>MP4</b> file. The metadata endpoint adds <b>merge=1</b> automatically for every video-only entry
+            (when SaveFrom returns at least one audio format), so the frontend does not need a special branch.<br>
+            Response header <b>X-Source</b> becomes <code>savefrom+ffmpeg</code>.
+            Merging needs more time — a 10-minute video can take <b>20-60 seconds</b>.
+            If ffmpeg fails to load, the Worker silently falls back to streaming the raw video-only file
+            so the user still gets <b>something</b>.
           </div>
         </div>
 
@@ -1503,11 +1363,10 @@ console.log(data.data.videos);</pre>
             <span class="api-method get">GET</span> Code used by this site
           </div>
           <div class="api-desc">
-            The <b>Downloader → YouTube</b> tab uses <code>?url=</code> to read the real resolution list of the video,
-            then <code>?dl=</code> (the ready-made links inside <b>data.videos[].url</b> / <b>data.audios[].url</b>) to download.
-            No static list like 2160p / 1440p is forced: only formats that actually exist for that video are shown,
-            each with a <b>with audio</b> / <b>no audio</b> badge.<br>
-            If YouTube is completely down, the Worker automatically falls back to SaveFrom — no frontend changes required.
+            The <b>Downloader → YouTube</b> tab calls <code>?url=</code> to read the real format list,
+            then downloads using each item's ready-made <b>url</b> (which is a <code>?svdl=</code> link).
+            Video-only items hit the auto-merge path; audio items stream separately.
+            If a format URL is expired (403/404/410/502/503), the frontend re-fetches metadata and retries with the refreshed URL.
           </div>
           <button class="api-code-toggle" data-target="code-yt-web">
             <i class="fa-solid fa-chevron-right"></i> Example
@@ -1541,10 +1400,8 @@ function ytVideoOptions(data) {
     if (!cur || score(v) > score(cur)) byHeight.set(h, v);
   });
   return [...byHeight.entries()].sort((a, b) => b[0] - a[0]).map(([h, v]) => ({
-    label: h + 'p' + (Number(v.fps) >= 50 ? '60' : ''),
-    ext: v.extension, itag: v.itag, size: v.fileSize,
-    hasAudio: !!v.hasAudio,
-    url: v.url
+    label: h + 'p', ext: v.extension, itag: v.itag,
+    hasAudio: !!v.hasAudio, url: v.url
   }));
 }
 
@@ -1552,7 +1409,7 @@ async function ytDownloadFile(option, btn) {
   const res   = await fetch(option.url, { redirect: 'follow' });
   const total = Number(res.headers.get('content-length')) || 0;
   const name  = (res.headers.get('content-disposition') || '')
-  .match(/filename\*?=(?:UTF-8'')?["']?([^";']+)/i);
+    .match(/filename\*?=(?:UTF-8'')?["']?([^";']+)/i);
 
   const reader = res.body.getReader();
   const chunks = [];
@@ -1569,10 +1426,6 @@ async function ytDownloadFile(option, btn) {
   a.href = URL.createObjectURL(new Blob(chunks));
   a.download = name ? decodeURIComponent(name[1]) : `video-${option.label}.${option.ext}`;
   a.click();
-}
-
-function ytProxyUrl(rawUrl) {
-  return `${YT_DL_API}?proxy=${encodeURIComponent(rawUrl)}`;
 }</pre>
         </div>
 
@@ -1583,13 +1436,13 @@ function ytProxyUrl(rawUrl) {
           <div class="api-desc">
             Every error shares one shape: <code>{ "success": false, "error": "message" }</code>.
             Messages come back in Indonesian; the common ones and their meaning:<br>
-            <b>"URL atau ID YouTube tidak valid"</b> — invalid YouTube URL or ID<br>
+            <b>"Parameter url atau id wajib diisi"</b> — url or id parameter required<br>
+            <b>"URL atau ID YouTube tidak valid"</b> — invalid YouTube URL/ID<br>
             <b>"Parameter type harus auto, video, shorts, atau svfrom"</b> — type must be auto, video, shorts, or svfrom<br>
-            <b>"Parameter dl atau itag tidak valid"</b> — dl or itag parameter is invalid<br>
-            <b>"Format tidak tersedia di upstream"</b> — format unavailable upstream (itag expired / not offered in that region)<br>
-            <b>"Domain tidak diizinkan"</b> — domain not allowed (for <code>?proxy=</code>)<br>
-            <b>"SaveFrom error: ..."</b> — SaveFrom API failed (usually rate limit or unrecognized URL format)<br>
-            <b>"Format tidak ditemukan di SaveFrom (mungkin expired)"</b> — no matching q/ext/ct combination in the SaveFrom response
+            <b>"Parameter yt wajib diisi"</b> — yt parameter required on <code>?svdl=</code><br>
+            <b>"SaveFrom error: ..."</b> — SaveFrom API failed (rate limit or unrecognized URL)<br>
+            <b>"Format tidak ditemukan di SaveFrom (mungkin expired)"</b> — no matching q/ext/ct combination in the SaveFrom response<br>
+            <b>"Download gagal: ..."</b> — stream fetch failed (upstream rejected or timed out)
           </div>
         </div>
       </div>
